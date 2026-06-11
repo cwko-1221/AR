@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Positive Hero AR Challenge</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="has-character">
+    <main class="app-shell">
+      <section class="stage" aria-label="Positive Hero AR game">
+        <video id="webcam" class="camera" autoplay playsinline muted></video>
+        <canvas id="threeScene" class="three-scene" aria-hidden="true"></canvas>
+        <div id="previewWorld" class="preview-world" aria-hidden="true">
+          <div class="preview-sky">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div class="preview-gate">
+            <i></i>
+            <i></i>
+            <i></i>
+          </div>
+          <div class="preview-beacon preview-beacon-left"></div>
+          <div class="preview-beacon preview-beacon-right"></div>
+          <div class="preview-floor"></div>
+          <div class="preview-core">
+            <span></span>
+          </div>
+          <div class="preview-avatar">
+            <div class="preview-shadow"></div>
+            <img id="previewMascot" class="preview-mascot" src="./assets/communication.png" alt="" />
+            <div class="preview-body">
+              <div class="preview-antenna"></div>
+              <div class="preview-head"></div>
+              <div class="preview-ear preview-ear-left"></div>
+              <div class="preview-ear preview-ear-right"></div>
+              <div class="preview-torso"></div>
+              <div class="preview-chest"></div>
+              <div class="preview-arm preview-arm-left"></div>
+              <div class="preview-arm preview-arm-right"></div>
+              <div class="preview-hand preview-hand-left"></div>
+              <div class="preview-hand preview-hand-right"></div>
+              <div class="preview-leg preview-leg-left"></div>
+              <div class="preview-leg preview-leg-right"></div>
+              <div class="preview-boot preview-boot-left"></div>
+              <div class="preview-boot preview-boot-right"></div>
+            </div>
+          </div>
+        </div>
+        <canvas id="overlay" class="overlay"></canvas>
+
+        <section id="characterSelect" class="character-select" aria-label="Choose positive hero">
+          <div class="select-copy">
+            <h1>&#36984;&#25799;&#27491;&#21521;&#20448;</h1>
+            <p>&#36984;&#22909;&#35282;&#33394;&#24460;&#65292;&#31449;&#21040;&#37857;&#38957;&#21069;&#29992;&#36523;&#39636;&#25511;&#21046;&#27491;&#21521;&#20448;&#25910;&#38598;&#33021;&#37327;&#20809;&#29699;&#12290;</p>
+          </div>
+          <div id="characterGrid" class="character-grid"></div>
+        </section>
+
+        <div class="hud">
+          <div>
+            <p class="label">Score</p>
+            <p id="score" class="value">0</p>
+          </div>
+          <div>
+            <p class="label">Move</p>
+            <p id="moveState" class="value small">stand by</p>
+          </div>
+          <button id="startButton" type="button">&#38283;&#22987;&#36938;&#25138;</button>
+        </div>
+
+        <div id="statusPanel" class="status-panel">
+          <h1>&#27491;&#21521;&#20448; AR Challenge</h1>
+          <p id="statusText">&#20132;&#27969;&#20448; ready. Press Start camera, then move your body to collect light cores.</p>
+        </div>
+
+        <section class="mission-panel" aria-label="Positive questions and energy">
+          <div class="mission-head">
+            <div>
+              <p class="label">&#30070;&#21069;&#24618;&#29289;</p>
+              <h2 id="enemyName">&#23433;&#33298;&#24618;</h2>
+            </div>
+            <div class="energy-readout">
+              <p class="label">Energy</p>
+              <p id="energyText">0 / 3</p>
+            </div>
+          </div>
+          <div id="energyBar" class="energy-bar">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <p id="questionText" class="question-text"></p>
+          <div id="answerGrid" class="answer-grid"></div>
+          <p id="skillHint" class="skill-hint">&#31572;&#23565;&#38988;&#30446;&#20786;&#33021;&#65292;&#28385;&#33021;&#37327;&#24460;&#38617;&#25163;&#33289;&#39640;&#37323;&#25918;&#25216;&#33021;&#12290;</p>
+        </section>
+      </section>
+    </main>
+
+    <script src="./selector.js"></script>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
