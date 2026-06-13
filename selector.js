@@ -49,12 +49,13 @@
     window.selectedPositiveHero = character;
     previewMascot.src = character.image;
     startButton.disabled = false;
-    startButton.textContent = "\u958b\u59cb\u904a\u6232";
+    startButton.textContent = "\u555f\u52d5 Webcam";
     document.body.classList.add("has-character");
+    document.body.dataset.hero = character.id;
 
     if (statusText) {
       statusText.textContent =
-        character.name + " ready. Press Start camera, then move your body to collect light cores.";
+        character.name + " \u6e96\u5099\u5c31\u7dd2\uff1a\u8acb\u5148\u78ba\u8a8d\u89d2\u8272\uff0c\u518d\u958b\u59cb\u6311\u6230\u3002";
     }
 
     document.querySelectorAll(".character-card").forEach(function (card) {

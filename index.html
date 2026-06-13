@@ -6,11 +6,20 @@
     <title>Positive Hero AR Challenge</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
-  <body class="has-character">
+  <body class="has-character view-start">
     <main class="app-shell">
       <section class="stage" aria-label="Positive Hero AR game">
         <video id="webcam" class="camera" autoplay playsinline muted></video>
+        <div class="camera-preview" aria-label="Webcam preview">
+          <span>Webcam</span>
+          <i class="marker-frame" aria-hidden="true"></i>
+          <em id="markerReadout">Marker</em>
+          <video id="webcamPreview" autoplay playsinline muted></video>
+        </div>
         <canvas id="threeScene" class="three-scene" aria-hidden="true"></canvas>
+        <div class="stage-backdrop" aria-hidden="true"></div>
+        <div class="stage-light stage-light-left" aria-hidden="true"></div>
+        <div class="stage-light stage-light-right" aria-hidden="true"></div>
         <div id="previewWorld" class="preview-world" aria-hidden="true">
           <div class="preview-sky">
             <span></span>
@@ -51,15 +60,49 @@
         </div>
         <canvas id="overlay" class="overlay"></canvas>
 
+        <section id="startScreen" class="flow-screen start-screen" aria-label="Start screen">
+          <div class="flow-card hero-card">
+            <p class="screen-kicker">&#20219;&#21209;&#25351;&#20196; 01</p>
+            <h1>&#27491;&#21521;&#20448;&#20986;&#21205;</h1>
+            <p>今天的任務是擊退 5 隻「負向怪物」。選擇一位正向俠後，先左右移動避開攻擊；每 5 秒場上會出現星星，拾到星星才可回答正向問題為光劍充能。被擊中 3 次，任務失敗。</p>
+            <div class="mission-brief">
+              <div><strong>1</strong><span>&#36984;&#35282;&#33394;</span></div>
+              <div><strong>2</strong><span>避攻擊、拾星星</span></div>
+              <div><strong>3</strong><span>答題充能、揮劍</span></div>
+            </div>
+            <div class="start-actions">
+              <button id="goIntroButton" type="button">&#25509;&#21463;&#20219;&#21209;</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="introScreen" class="flow-screen intro-screen" aria-label="Game introduction">
+          <div class="flow-card wide">
+            <p class="screen-kicker">&#20219;&#21209;&#31777;&#22577;</p>
+            <h1>&#27491;&#21521;&#20448;&#65292;&#35531;&#28310;&#20633;&#27494;&#22120;</h1>
+            <div class="intro-steps">
+              <div><strong>1</strong><span>&#36984;&#25799;&#19968;&#20301;&#27491;&#21521;&#20448;&#65292;&#36914;&#20837;&#33021;&#37327;&#31478;&#25216;&#22580;&#12290;</span></div>
+              <div><strong>2</strong><span>怪物會發射攻擊，正向俠要左右移動閃避；每 5 秒拾到星星，才會彈出 1 題正向問題。</span></div>
+              <div><strong>3</strong><span>答對 3 題後光劍充能 100%，對著 Webcam 揮劍斬擊；若被擊中 3 次，任務失敗。</span></div>
+            </div>
+            <button id="goSelectButton" type="button">&#36984;&#25799;&#35282;&#33394;</button>
+          </div>
+        </section>
+
         <section id="characterSelect" class="character-select" aria-label="Choose positive hero">
           <div class="select-copy">
             <h1>&#36984;&#25799;&#27491;&#21521;&#20448;</h1>
-            <p>&#36984;&#22909;&#35282;&#33394;&#24460;&#65292;&#31449;&#21040;&#37857;&#38957;&#21069;&#29992;&#36523;&#39636;&#25511;&#21046;&#27491;&#21521;&#20448;&#25910;&#38598;&#33021;&#37327;&#20809;&#29699;&#12290;</p>
+            <p>選好角色後，進入怪獸鎖定場景。先避開攻擊，拾到星星後回答問題為光劍充能。</p>
           </div>
           <div id="characterGrid" class="character-grid"></div>
+          <button id="confirmCharacterButton" class="select-next" type="button">&#30906;&#23450;&#35282;&#33394;</button>
         </section>
 
         <div class="hud">
+          <div>
+            <p class="label">Round</p>
+            <p id="roundText" class="value small">1 / 5</p>
+          </div>
           <div>
             <p class="label">Score</p>
             <p id="score" class="value">0</p>
@@ -68,15 +111,51 @@
             <p class="label">Move</p>
             <p id="moveState" class="value small">stand by</p>
           </div>
-          <button id="startButton" type="button">&#38283;&#22987;&#36938;&#25138;</button>
+          <div>
+            <p class="label">Combo</p>
+            <p id="comboText" class="value small">x0</p>
+          </div>
+          <div>
+            <p class="label">Time</p>
+            <p id="timerText" class="value small">45</p>
+          </div>
+          <button id="startButton" type="button">&#21855;&#21205; Webcam</button>
+          <button id="openQuestionButton" type="button">&#31572;&#38988;&#20805;&#33021;</button>
         </div>
 
+        <aside id="enemyHud" class="enemy-hud" aria-label="Enemy status">
+          <img id="enemyPortrait" src="./assets/comfort-monster.png" alt="" />
+          <div>
+            <p class="label">&#24618;&#29289;&#30446;&#27161;</p>
+            <h2 id="enemyHudName">&#23433;&#33298;&#24618;</h2>
+            <div class="hp-track"><span id="enemyHpBar"></span></div>
+          </div>
+        </aside>
+
+        <div id="gameToast" class="game-toast" aria-live="polite">&#24618;&#29289;&#37782;&#23450;</div>
+
+        <div id="bossWarning" class="boss-warning" aria-live="polite">
+          <p>WARNING</p>
+          <strong id="bossWarningName">&#23433;&#33298;&#24618;</strong>
+          <span>&#24618;&#29289;&#20837;&#20405; - GET READY</span>
+        </div>
+
+        <div id="screenFlash" class="screen-flash" aria-hidden="true"></div>
+
         <div id="statusPanel" class="status-panel">
+          <p class="console-kicker" id="phaseText">LOCK ON</p>
           <h1>&#27491;&#21521;&#20448; AR Challenge</h1>
-          <p id="statusText">&#20132;&#27969;&#20448; ready. Press Start camera, then move your body to collect light cores.</p>
+          <p id="statusText">&#20132;&#27969;&#20448;&#28310;&#20633;&#23601;&#32210;&#65306;&#35531;&#20808;&#30906;&#35469;&#35282;&#33394;&#65292;&#20877;&#38283;&#22987;&#25361;&#25136;&#12290;</p>
+        </div>
+
+        <div id="heroHealth" class="hero-health" aria-label="Positive hero health">
+          <span>&#27491;&#21521;&#20448; HP</span>
+          <div class="hero-hp-track"><span id="heroHpBar"></span></div>
+          <strong id="heroHpText">3 / 3</strong>
         </div>
 
         <section class="mission-panel" aria-label="Positive questions and energy">
+          <p class="screen-kicker">&#31572;&#38988;&#20805;&#33021;</p>
           <div class="mission-head">
             <div>
               <p class="label">&#30070;&#21069;&#24618;&#29289;</p>
@@ -93,8 +172,19 @@
             <span></span>
           </div>
           <p id="questionText" class="question-text"></p>
+          <p id="markerStatus" class="marker-status">請把 A/B/C/D Marker 卡放入 Webcam 中央框。</p>
           <div id="answerGrid" class="answer-grid"></div>
-          <p id="skillHint" class="skill-hint">&#31572;&#23565;&#38988;&#30446;&#20786;&#33021;&#65292;&#28385;&#33021;&#37327;&#24460;&#38617;&#25163;&#33289;&#39640;&#37323;&#25918;&#25216;&#33021;&#12290;</p>
+          <p id="skillHint" class="skill-hint">&#31572;&#23565;&#19977;&#38988;&#20805;&#33021;&#20809;&#21133;&#65292;100% &#24460;&#22238;&#21040;&#22580;&#26223;&#25582;&#21133;&#26028;&#25802;&#12290;</p>
+          <button id="backToGameButton" class="back-game" type="button">&#22238;&#21040;&#22580;&#26223;</button>
+        </section>
+
+        <section id="victoryScreen" class="flow-screen victory-screen" aria-label="Victory screen">
+          <div class="flow-card">
+            <p class="screen-kicker">VICTORY</p>
+            <h1>&#27491;&#21521;&#33021;&#37327;&#20840;&#37096;&#35299;&#25918;</h1>
+            <p id="victoryText">&#25104;&#21151;&#25802;&#36864;&#25152;&#26377;&#24618;&#29289;&#65292;&#23436;&#25104;&#27491;&#21521;&#25361;&#25136;&#12290;</p>
+            <button id="restartButton" type="button">&#20877;&#29609;&#19968;&#27425;</button>
+          </div>
         </section>
       </section>
     </main>

@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Positive Hero Marker Cards</title>
+    <style>
+      :root {
+        font-family: Arial, "Microsoft JhengHei", sans-serif;
+        color: #111;
+        background: #f4f6f3;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 18mm;
+      }
+
+      header {
+        max-width: 190mm;
+        margin: 0 auto 8mm;
+      }
+
+      h1 {
+        margin: 0 0 3mm;
+        font-size: 22pt;
+      }
+
+      p {
+        margin: 0;
+        font-size: 11pt;
+        line-height: 1.45;
+      }
+
+      .sheet {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8mm;
+        max-width: 190mm;
+        margin: 0 auto;
+      }
+
+      .card {
+        display: flex;
+        min-height: 122mm;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        border: 0.65mm dashed #999;
+        border-radius: 4mm;
+        padding: 8mm;
+        background: #fff;
+        page-break-inside: avoid;
+      }
+
+      .marker {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: repeat(4, 1fr);
+        width: 72mm;
+        height: 72mm;
+        border: 5mm solid #000;
+        background: #fff;
+      }
+
+      .cell {
+        border: 0.28mm solid #d7d7d7;
+        background: #fff;
+      }
+
+      .cell.on {
+        background: #000;
+        border-color: #000;
+      }
+
+      .letter {
+        margin-top: 5mm;
+        font-size: 48pt;
+        font-weight: 950;
+        line-height: 1;
+      }
+
+      .label {
+        margin-top: 2mm;
+        font-size: 13pt;
+        font-weight: 800;
+      }
+
+      .hint {
+        margin-top: 3mm;
+        font-size: 9pt;
+        color: #444;
+      }
+
+      @media print {
+        body {
+          padding: 9mm;
+          background: #fff;
+        }
+
+        header {
+          display: none;
+        }
+
+        .sheet {
+          gap: 6mm;
+          max-width: none;
+        }
+
+        .card {
+          min-height: 130mm;
+          border-color: #aaa;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>正向俠 AR Challenge Marker Cards</h1>
+      <p>列印後沿虛線剪開。答題時把卡片上方黑白 Marker 放入 Webcam 中央框，保持正向、光線充足、不要遮住黑色外框。</p>
+    </header>
+
+    <main class="sheet">
+      <section class="card">
+        <div class="marker" aria-label="Marker A">
+          <span class="cell on"></span><span class="cell"></span><span class="cell"></span><span class="cell"></span>
+          <span class="cell"></span><span class="cell on"></span><span class="cell on"></span><span class="cell"></span>
+          <span class="cell"></span><span class="cell on"></span><span class="cell"></span><span class="cell on"></span>
+          <span class="cell"></span><span class="cell"></span><span class="cell"></span><span class="cell on"></span>
+        </div>
+        <div>
+          <div class="letter">A</div>
+          <div class="label">答案 A</div>
+          <div class="hint">請勿旋轉卡片</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="marker" aria-label="Marker B">
+          <span class="cell on"></span><span class="cell on"></span><span class="cell"></span><span class="cell"></span>
+          <span class="cell on"></span><span class="cell"></span><span class="cell on"></span><span class="cell"></span>
+          <span class="cell"></span><span class="cell"></span><span class="cell on"></span><span class="cell on"></span>
+          <span class="cell"></span><span class="cell on"></span><span class="cell"></span><span class="cell on"></span>
+        </div>
+        <div>
+          <div class="letter">B</div>
+          <div class="label">答案 B</div>
+          <div class="hint">請勿旋轉卡片</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="marker" aria-label="Marker C">
+          <span class="cell on"></span><span class="cell"></span><span class="cell on"></span><span class="cell"></span>
+          <span class="cell"></span><span class="cell"></span><span class="cell on"></span><span class="cell on"></span>
+          <span class="cell on"></span><span class="cell on"></span><span class="cell"></span><span class="cell"></span>
+          <span class="cell"></span><span class="cell on"></span><span class="cell on"></span><span class="cell on"></span>
+        </div>
+        <div>
+          <div class="letter">C</div>
+          <div class="label">答案 C</div>
+          <div class="hint">請勿旋轉卡片</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="marker" aria-label="Marker D">
+          <span class="cell on"></span><span class="cell on"></span><span class="cell on"></span><span class="cell"></span>
+          <span class="cell"></span><span class="cell on"></span><span class="cell"></span><span class="cell on"></span>
+          <span class="cell on"></span><span class="cell"></span><span class="cell"></span><span class="cell"></span>
+          <span class="cell"></span><span class="cell"></span><span class="cell on"></span><span class="cell on"></span>
+        </div>
+        <div>
+          <div class="letter">D</div>
+          <div class="label">答案 D</div>
+          <div class="hint">請勿旋轉卡片</div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
