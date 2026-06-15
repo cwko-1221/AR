@@ -2362,7 +2362,7 @@ async function startCamera(options = {}) {
         if (!silent) {
           setStatus("\u5df2\u555f\u52d5 Webcam\uff0c\u52d5\u4f5c\u8ffd\u8e64\u6b63\u5728\u5f8c\u5099\u6a21\u5f0f\u3002");
         }
-        setTimeout(predictFrame, 80);
+        setTimeout(predictFrame, 25);
         return true;
       }
     }
@@ -2370,7 +2370,7 @@ async function startCamera(options = {}) {
     if (!silent) {
       setStatus(`${selectedCharacter.name} \u5df2\u51fa\u52d5\uff01\u8acb\u6309\u300c\u7b54\u984c\u5145\u80fd\u300d\u70ba\u5149\u528d\u5132\u6eff\u80fd\u91cf\u3002`);
     }
-    setTimeout(predictFrame, 80);
+    setTimeout(predictFrame, 25);
     return true;
   } catch (error) {
     console.error(error);
@@ -2415,10 +2415,10 @@ function updateAvatar(landmarks) {
     poseCenterX = mirroredBodyX;
   }
 
-  smoothed.x = lerp(smoothed.x, mirroredBodyX, 0.22);
-  smoothed.y = lerp(smoothed.y, bodyCenter.y + (handRaised ? -0.12 : 0.07), 0.18);
-  smoothed.tilt = lerp(smoothed.tilt, shoulderTilt, 0.2);
-  smoothed.jump = lerp(smoothed.jump, handRaised ? 1 : 0, 0.26);
+  smoothed.x = lerp(smoothed.x, mirroredBodyX, 0.48);
+  smoothed.y = lerp(smoothed.y, bodyCenter.y + (handRaised ? -0.12 : 0.07), 0.42);
+  smoothed.tilt = lerp(smoothed.tilt, shoulderTilt, 0.45);
+  smoothed.jump = lerp(smoothed.jump, handRaised ? 1 : 0, 0.55);
 
   const world = normalizedToWorld(smoothed);
   const relativeBodyX = clamp((smoothed.x - poseCenterX) / POSE_CONTROL_RANGE, -1, 1);
@@ -2624,7 +2624,7 @@ function predictFrame() {
     scanAnswerMarker();
   }
 
-  setTimeout(predictFrame, 80);
+  setTimeout(predictFrame, 25);
 }
 
 startButton.addEventListener("click", startCamera);
