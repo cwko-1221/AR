@@ -2605,7 +2605,7 @@ function predictFrame() {
   if (!running) return;
 
   poseFrameSkip++;
-  if (video.currentTime !== lastVideoTime && poseFrameSkip >= 2) {
+  if (video.currentTime !== lastVideoTime && poseFrameSkip >= 3) {
     poseFrameSkip = 0;
     lastVideoTime = video.currentTime;
     if (landmarker) {

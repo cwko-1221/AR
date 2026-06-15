@@ -941,7 +941,6 @@ body {
   aspect-ratio: 1;
   border-radius: 50%;
   pointer-events: none;
-  filter: blur(8px);
   opacity: 0.58;
 }
 
@@ -1076,7 +1075,7 @@ body {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 0.7rem;
-  backdrop-filter: blur(18px);
+  backdrop-filter: none;
 }
 
 .enemy-hud img {
@@ -1133,7 +1132,7 @@ body {
     0 18px 55px rgba(0, 0, 0, 0.32),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
   color: #edfff6;
-  backdrop-filter: blur(16px);
+  backdrop-filter: none;
 }
 
 .view-game .hero-health,
@@ -1396,7 +1395,7 @@ button:disabled {
   background:
     radial-gradient(circle at 50% 34%, rgba(87, 199, 255, 0.18), transparent 30%),
     rgba(4, 11, 13, 0.7);
-  backdrop-filter: blur(10px);
+  backdrop-filter: none;
 }
 
 .flow-card {
@@ -1515,7 +1514,11 @@ button:disabled {
 .camera {
   object-fit: cover;
   opacity: 0;
-  filter: saturate(1.08) contrast(1.04);
+  pointer-events: none;
+  width: 1px !important;
+  height: 1px !important;
+  position: absolute;
+  overflow: hidden;
 }
 
 .three-scene {
@@ -1789,7 +1792,7 @@ button:disabled {
   border-radius: 8px;
   background: rgba(8, 18, 15, 0.82);
   padding: 0.65rem 0.8rem;
-  backdrop-filter: blur(18px);
+  backdrop-filter: none;
 }
 
 .select-copy h1 {
@@ -1823,7 +1826,7 @@ button:disabled {
   padding: 0.28rem;
   text-align: left;
   box-shadow: none;
-  backdrop-filter: blur(18px);
+  backdrop-filter: none;
 }
 
 .character-card::before {
@@ -1986,7 +1989,7 @@ button:disabled {
   border-radius: 8px;
   background: var(--panel);
   padding: 0.68rem 0.8rem;
-  backdrop-filter: blur(18px);
+  backdrop-filter: none;
 }
 
 .hud button {
@@ -2027,7 +2030,7 @@ button:disabled {
   border-radius: 8px;
   background: var(--panel-strong);
   padding: 1rem 1.1rem;
-  backdrop-filter: blur(18px);
+  backdrop-filter: none;
 }
 
 .status-panel h1 {
@@ -2053,7 +2056,7 @@ button:disabled {
   border-radius: 8px;
   background: rgba(8, 18, 15, 0.86);
   padding: 0.9rem;
-  backdrop-filter: blur(18px);
+  backdrop-filter: none;
 }
 
 .view-start .mission-panel,
