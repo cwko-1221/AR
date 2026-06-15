@@ -2362,7 +2362,7 @@ async function startCamera(options = {}) {
         if (!silent) {
           setStatus("\u5df2\u555f\u52d5 Webcam\uff0c\u52d5\u4f5c\u8ffd\u8e64\u6b63\u5728\u5f8c\u5099\u6a21\u5f0f\u3002");
         }
-        requestAnimationFrame(predictFrame);
+        setTimeout(predictFrame, 80);
         return true;
       }
     }
@@ -2370,7 +2370,7 @@ async function startCamera(options = {}) {
     if (!silent) {
       setStatus(`${selectedCharacter.name} \u5df2\u51fa\u52d5\uff01\u8acb\u6309\u300c\u7b54\u984c\u5145\u80fd\u300d\u70ba\u5149\u528d\u5132\u6eff\u80fd\u91cf\u3002`);
     }
-    requestAnimationFrame(predictFrame);
+    setTimeout(predictFrame, 80);
     return true;
   } catch (error) {
     console.error(error);
@@ -2604,9 +2604,7 @@ function animateThree() {
 function predictFrame() {
   if (!running) return;
 
-  poseFrameSkip++;
-  if (video.currentTime !== lastVideoTime && poseFrameSkip >= 3) {
-    poseFrameSkip = 0;
+  if (video.currentTime !== lastVideoTime) {
     lastVideoTime = video.currentTime;
     if (landmarker) {
       const results = landmarker.detectForVideo(video, performance.now());
@@ -2626,7 +2624,7 @@ function predictFrame() {
     scanAnswerMarker();
   }
 
-  requestAnimationFrame(predictFrame);
+  setTimeout(predictFrame, 80);
 }
 
 startButton.addEventListener("click", startCamera);
