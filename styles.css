@@ -442,8 +442,8 @@
 .marker-frame::after {
   content: "";
   position: absolute;
-  inset: 18%;
-  border: 1px dashed rgba(255, 255, 255, 0.58);
+  inset: 0;
+  border: 2px dashed rgba(255, 255, 255, 0.9);
   border-radius: 4px;
 }
 
@@ -601,8 +601,8 @@
 .marker-frame::after {
   content: "";
   position: absolute;
-  inset: 18%;
-  border: 1px dashed rgba(255, 255, 255, 0.58);
+  inset: 0;
+  border: 2px dashed rgba(255, 255, 255, 0.9);
   border-radius: 4px;
 }
 
