@@ -920,33 +920,27 @@ function ensureMarkerCanvas() {
   return Boolean(markerCtx);
 }
 
-function averageMarkerCellDarkness(imageData, cellX, cellY) {
-  const cellSize = MARKER_SCAN_SIZE / MARKER_GRID_SIZE;
-  const margin = cellSize * 0.22;
-  const startX = Math.floor(cellX * cellSize + margin);
-  const endX = Math.floor((cellX + 1) * cellSize - margin);
-  const startY = Math.floor(cellY * cellSize + margin);
-  const endY = Math.floor((cellY + 1) * cellSize - margin);
-  let total = 0;
-  let samples = 0;
+let tesseractWorker = null;
+let isScanningOcr = false;
 
-  for (let y = startY; y < endY; y += 1) {
-    for (let x = startX; x < endX; x += 1) {
-      const index = (y * MARKER_SCAN_SIZE + x) * 4;
-      const r = imageData.data[index];
-      const g = imageData.data[index + 1];
-      const b = imageData.data[index + 2];
-      total += 1 - (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
-      samples += 1;
-    }
-  }
-
-  return samples ? total / samples : 0;
+async function initTesseract() {
+  tesseractWorker = await Tesseract.createWorker('eng');
+  await tesseractWorker.setParameters({
+    tessedit_char_whitelist: 'ABCD',
+  });
 }
 
-function decodeMarkerBits() {
-  if (!running || !ensureMarkerCanvas() || video.readyState < 2 || !video.videoWidth || !video.videoHeight) {
-    return null;
+async function scanAnswerMarker() {
+  if (!document.body.classList.contains("view-question") || skillReady || !ENEMIES[currentEnemyIndex]) {
+    markerCandidate = null;
+    markerStableCount = 0;
+    return;
+  }
+
+  if (isScanningOcr || !tesseractWorker) return;
+
+  if (!ensureMarkerCanvas() || video.readyState < 2 || !video.videoWidth || !video.videoHeight) {
+    return;
   }
 
   const videoAspect = video.videoWidth / video.videoHeight;
@@ -959,74 +953,49 @@ function decodeMarkerBits() {
   }
   const sourceX = (video.videoWidth - sourceSize) / 2;
   const sourceY = (video.videoHeight - sourceSize) / 2;
+
   markerCtx.save();
-  markerCtx.translate(MARKER_SCAN_SIZE, 0);
-  markerCtx.scale(-1, 1);
+  // No mirror flip needed, OCR needs correct text orientation
   markerCtx.drawImage(video, sourceX, sourceY, sourceSize, sourceSize, 0, 0, MARKER_SCAN_SIZE, MARKER_SCAN_SIZE);
   markerCtx.restore();
 
-  const imageData = markerCtx.getImageData(0, 0, MARKER_SCAN_SIZE, MARKER_SCAN_SIZE);
-  const darkness = [];
-  for (let y = 0; y < MARKER_GRID_SIZE; y += 1) {
-    for (let x = 0; x < MARKER_GRID_SIZE; x += 1) {
-      darkness.push(averageMarkerCellDarkness(imageData, x, y));
+  isScanningOcr = true;
+  updateMarkerStatus("\u6b63\u5728\u8fa8\u8b58\u5b57\u6bcd...", "detecting"); // "正在辨識字母..."
+
+  try {
+    const { data: { text } } = await tesseractWorker.recognize(markerCanvas);
+    const cleaned = text.trim().toUpperCase();
+    const match = cleaned.match(/[ABCD]/);
+
+    if (match) {
+      const letter = match[0];
+      if (markerCandidate === letter) {
+        markerStableCount += 1;
+      } else {
+        markerCandidate = letter;
+        markerStableCount = 1;
+      }
+
+      updateMarkerStatus(`\u6383\u63cf\u4e2d\uff1a${letter}`, "detecting"); // "掃描中：X"
+
+      if (markerStableCount >= 2 && performance.now() - lastMarkerAnswerAt > 1400) {
+        lastMarkerAnswerAt = performance.now();
+        markerStableCount = 0;
+        markerCandidate = null;
+        updateMarkerStatus(`\u5df2\u8b80\u53d6 ${letter}`, "success"); // "已讀取 X"
+        const answerIndex = MARKER_PATTERNS.findIndex((p) => p.letter === letter);
+        answerQuestion(answerIndex);
+      }
+    } else {
+      markerCandidate = null;
+      markerStableCount = 0;
+      updateMarkerStatus("\u672a\u8fa8\u8b58\u5230\u5b57\u6bcd\uff1a\u8acb\u5c07\u5b57\u6bcd\u653e\u5165\u4e2d\u592e\u6846\u5167", "detecting"); // "未辨識到字母：請將字母放入中央框內"
     }
+  } catch (err) {
+    console.error("OCR Error:", err);
+  } finally {
+    isScanningOcr = false;
   }
-
-  const minDark = Math.min(...darkness);
-  const maxDark = Math.max(...darkness);
-  const contrast = maxDark - minDark;
-  if (contrast < 30) return null;
-
-  const threshold = (minDark + maxDark) / 2;
-  const bits = darkness.map((value) => (value > threshold ? "1" : "0")).join("");
-  let best = null;
-
-  MARKER_PATTERNS.forEach((pattern, answerIndex) => {
-    let distance = 0;
-    for (let index = 0; index < bits.length; index += 1) {
-      if (bits[index] !== pattern.bits[index]) distance += 1;
-    }
-    if (!best || distance < best.distance) {
-      best = { answerIndex, letter: pattern.letter, distance, contrast };
-    }
-  });
-
-  if (!best || best.distance > 2) return null;
-  return best;
-}
-
-function scanAnswerMarker() {
-  if (!document.body.classList.contains("view-question") || skillReady || !ENEMIES[currentEnemyIndex]) {
-    markerCandidate = null;
-    markerStableCount = 0;
-    return;
-  }
-
-  const result = decodeMarkerBits();
-  if (!result) {
-    markerCandidate = null;
-    markerStableCount = 0;
-    updateMarkerStatus("\u672a\u6383\u5230 Marker\uff1a\u8acb\u628a\u5361\u7247\u653e\u6eff Webcam \u4e2d\u592e\u6846\u3002", "detecting");
-    return;
-  }
-
-  if (markerCandidate === result.letter) {
-    markerStableCount += 1;
-  } else {
-    markerCandidate = result.letter;
-    markerStableCount = 1;
-  }
-
-  updateMarkerStatus(`\u6383\u63cf\u4e2d\uff1a${result.letter}`, "detecting");
-
-  if (markerStableCount < 5 || performance.now() - lastMarkerAnswerAt < 1400) return;
-
-  lastMarkerAnswerAt = performance.now();
-  markerStableCount = 0;
-  markerCandidate = null;
-  updateMarkerStatus(`\u5df2\u8b80\u53d6 ${result.letter}`, "success");
-  answerQuestion(result.answerIndex);
 }
 
 function selectCharacter(character) {
@@ -2697,6 +2666,7 @@ window.addEventListener("keydown", (event) => {
   }
 });
 initThree();
+initTesseract();
 startAmbientAudio();
 
 if (window.selectedPositiveHero) {
