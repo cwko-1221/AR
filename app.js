@@ -261,6 +261,7 @@ let markerCtx;
 let markerCandidate = null;
 let markerStableCount = 0;
 let lastMarkerAnswerAt = 0;
+let poseFrameSkip = 0;
 let dodgeState = "idle";
 let dodgeTimeout = null;
 let dodgeRetryTimeout = null;
@@ -2245,19 +2246,16 @@ function initThree() {
 
   renderer = new THREE.WebGLRenderer({
     alpha: true,
-    antialias: true,
+    antialias: false,
     canvas: threeCanvas,
   });
   renderer.setClearColor(0x000000, 0);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.setPixelRatio(1);
+  renderer.shadowMap.enabled = false;
 
   const hemisphere = new THREE.HemisphereLight(0xf0fff9, 0x16463a, 2.75);
   const key = new THREE.DirectionalLight(0xffffff, 3.5);
   key.position.set(-2.8, 5.4, 4.2);
-  key.castShadow = true;
-  key.shadow.mapSize.set(1024, 1024);
   const rim = new THREE.PointLight(0xffd166, 2.2, 7);
   rim.position.set(2.4, 2.7, 2.6);
 
@@ -2604,7 +2602,9 @@ function animateThree() {
 function predictFrame() {
   if (!running) return;
 
-  if (video.currentTime !== lastVideoTime) {
+  poseFrameSkip++;
+  if (video.currentTime !== lastVideoTime && poseFrameSkip >= 2) {
+    poseFrameSkip = 0;
     lastVideoTime = video.currentTime;
     if (landmarker) {
       const results = landmarker.detectForVideo(video, performance.now());
