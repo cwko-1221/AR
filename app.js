@@ -1636,7 +1636,7 @@ function createEnemyProjectile(attemptId = dodgeAttemptId) {
   const start = new THREE.Vector3(enemyPosition.x, enemyPosition.y + 0.26, enemyPosition.z + 0.22);
   const group = new THREE.Group();
   const core = new THREE.Mesh(
-    new THREE.SphereGeometry(0.16, 28, 18),
+    new THREE.SphereGeometry(0.16, 12, 8),
     new THREE.MeshStandardMaterial({
       color: 0xff315f,
       emissive: 0xff174c,
@@ -1646,7 +1646,7 @@ function createEnemyProjectile(attemptId = dodgeAttemptId) {
     }),
   );
   const glow = new THREE.Mesh(
-    new THREE.SphereGeometry(0.32, 28, 18),
+    new THREE.SphereGeometry(0.32, 12, 8),
     new THREE.MeshBasicMaterial({
       color: 0xff5f7d,
       transparent: true,
@@ -1655,7 +1655,7 @@ function createEnemyProjectile(attemptId = dodgeAttemptId) {
     }),
   );
   const ring = new THREE.Mesh(
-    new THREE.TorusGeometry(0.24, 0.018, 8, 42),
+    new THREE.TorusGeometry(0.24, 0.018, 6, 20),
     new THREE.MeshBasicMaterial({
       color: 0xffd166,
       transparent: true,
@@ -1688,7 +1688,7 @@ function createEnemyProjectile(attemptId = dodgeAttemptId) {
     startZ: start.z,
     endZ: PROJECTILE_END_Z,
     z: start.z,
-    speed: 0.042 + Math.random() * 0.016,
+    speed: (0.042 + Math.random() * 0.016) * 60,
     life: 1,
     hit: false,
     scoring: dodgeState === "waiting",
@@ -1725,7 +1725,7 @@ function openQuestionAfterDodge(attemptId = dodgeAttemptId) {
   if (attemptId !== dodgeAttemptId) return;
 }
 
-function updateEnemyProjectiles(elapsed) {
+function updateEnemyProjectiles(elapsed, dt = 1/60) {
   const canAttack =
     document.body.classList.contains("enemy-entered") &&
     document.body.classList.contains("hero-entered") &&
@@ -1742,6 +1742,7 @@ function updateEnemyProjectiles(elapsed) {
   }
 
   enemyProjectiles = enemyProjectiles.filter((projectile) => {
+    projectile.dt = dt;
     if (projectile.attemptId !== dodgeAttemptId) {
       scene.remove(projectile.group, projectile.warning);
       projectile.group.traverse((child) => {
@@ -1754,7 +1755,7 @@ function updateEnemyProjectiles(elapsed) {
     }
 
     if (!projectile.resolved) {
-      projectile.z += projectile.speed;
+      projectile.z += projectile.speed * projectile.dt;
     }
     const progress = clamp((projectile.z - projectile.startZ) / (projectile.endZ - projectile.startZ), 0, 1);
     const x = lerp(projectile.startX, projectile.laneX, progress);
@@ -1811,7 +1812,7 @@ function updateEnemyProjectiles(elapsed) {
     }
 
     if (projectile.resolved) {
-      projectile.life -= projectile.resolveKind === "hit" ? 0.075 : 0.055;
+      projectile.life -= (projectile.resolveKind === "hit" ? 0.075 : 0.055) * projectile.dt * 60;
       projectile.group.traverse((child) => {
         if (child.material && "opacity" in child.material) {
           child.material.transparent = true;
@@ -2499,6 +2500,7 @@ function drawPose(landmarks) {
 }
 
 function animateThree() {
+  const dt = Math.min(clock.getDelta(), 0.1);
   const elapsed = clock.getElapsedTime();
   const jumpArc = Math.max(0, 1 - (performance.now() - lastJumpAt) / 520);
   const hop = Math.sin(jumpArc * Math.PI) * 0.45;
@@ -2552,7 +2554,7 @@ function animateThree() {
   }
 
   skillBeams = skillBeams.filter((beam) => {
-    beam.userData.life -= 0.035;
+    beam.userData.life -= 0.035 * dt * 60;
     if (beam.material) {
       beam.material.opacity = Math.max(0, beam.userData.life);
     }
@@ -2592,7 +2594,7 @@ function animateThree() {
     enemy.platform.rotation.y += index === currentEnemyIndex ? 0.025 : 0.01;
   });
 
-  updateEnemyProjectiles(elapsed);
+  updateEnemyProjectiles(elapsed, dt);
   updateStarPickup(elapsed);
 
   renderer.render(scene, camera3D);
