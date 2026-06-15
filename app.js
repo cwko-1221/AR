@@ -955,12 +955,16 @@ async function scanAnswerMarker() {
   const sourceY = (video.videoHeight - sourceSize) / 2;
 
   markerCtx.save();
-  // No mirror flip needed, OCR needs correct text orientation
-  markerCtx.drawImage(video, sourceX, sourceY, sourceSize, sourceSize, 0, 0, MARKER_SCAN_SIZE, MARKER_SCAN_SIZE);
+  // Draw it larger (e.g. 224x224) to give Tesseract more pixels to work with
+  // We can just use the same markerCanvas but scale it up visually or just rely on Tesseract's internal scaling.
+  // Actually, Tesseract prefers larger images, so let's draw directly with a scale!
+  markerCanvas.width = 300;
+  markerCanvas.height = 300;
+  markerCtx.drawImage(video, sourceX, sourceY, sourceSize, sourceSize, 0, 0, 300, 300);
   markerCtx.restore();
 
   isScanningOcr = true;
-  updateMarkerStatus("\u6b63\u5728\u8fa8\u8b58\u5b57\u6bcd...", "detecting"); // "正在辨識字母..."
+  // Removed the "正在辨識字母..." status update to prevent UI flashing
 
   try {
     const { data: { text } } = await tesseractWorker.recognize(markerCanvas);
@@ -989,7 +993,8 @@ async function scanAnswerMarker() {
     } else {
       markerCandidate = null;
       markerStableCount = 0;
-      updateMarkerStatus("\u672a\u8fa8\u8b58\u5230\u5b57\u6bcd\uff1a\u8acb\u5c07\u5b57\u6bcd\u653e\u5165\u4e2d\u592e\u6846\u5167", "detecting"); // "未辨識到字母：請將字母放入中央框內"
+      // Use a consistent prompt instead of flashing "未辨識到"
+      updateMarkerStatus("\u8acb\u5c07\u5b57\u6bcd A/B/C/D \u5c0d\u6e96\u4e2d\u592e\u6846\u5167", "detecting"); // "請將字母 A/B/C/D 對準中央框內"
     }
   } catch (err) {
     console.error("OCR Error:", err);
