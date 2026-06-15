@@ -1,4 +1,4 @@
-﻿import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js";
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js";
 
 const video = document.querySelector("#webcam");
 const previewVideo = document.querySelector("#webcamPreview");
@@ -2335,8 +2335,8 @@ async function startCamera(options = {}) {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: "user",
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
+        width: { ideal: 640 },
+        height: { ideal: 480 },
       },
       audio: false,
     });
@@ -2497,19 +2497,7 @@ function checkTargetHit() {
 
 function drawPose(landmarks) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.save();
-  ctx.scale(-1, 1);
-  ctx.translate(-canvas.clientWidth, 0);
-
-  drawingUtils.drawConnectors(landmarks, POSE_CONNECTIONS, {
-    color: "rgba(110, 255, 182, 0.86)",
-    lineWidth: 4,
-  });
-  drawingUtils.drawLandmarks(landmarks, {
-    color: "#ffd166",
-    radius: 4,
-  });
-  ctx.restore();
+  // Disabled drawing landmarks and connectors for performance and UX
 }
 
 function animateThree() {
