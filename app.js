@@ -888,12 +888,18 @@ function answerQuestion(answerIndex) {
     updateGameHUD();
     playWrong();
     flashScreen("hit");
-    showToast("\u6f0f\u96fb\uff01\u8acb\u88dc\u7b54\u6b63\u78ba\u5b57\u6bcd", "danger");
-    setStatus("\u5149\u528d\u6f0f\u96fb\uff01\u8acb\u88dc\u7b54\u6b63\u78ba\u5b57\u6bcd\u624d\u80fd\u7e7c\u7e8c\u5145\u80fd\u3002");
-  }
-
-  if (!isCorrect) {
-    window.setTimeout(updateMissionUI, 1100);
+    showToast("答錯了！請重新收集星星", "danger");
+    setStatus("答錯了！請回到場景中重新收集星星再挑戰。");
+    
+    // 直接關閉問題回到遊戲畫面
+    setView("game");
+    
+    window.setTimeout(() => {
+      updateMissionUI();
+      if (!skillReady && ENEMIES[currentEnemyIndex]) {
+        startDodgeChallenge(850);
+      }
+    }, 1500);
   }
 }
 
