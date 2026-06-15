@@ -1514,7 +1514,7 @@ button:disabled {
 
 .camera {
   object-fit: cover;
-  opacity: 0.76;
+  opacity: 0;
   filter: saturate(1.08) contrast(1.04);
 }
 
