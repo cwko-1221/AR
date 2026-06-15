@@ -967,11 +967,12 @@ async function scanAnswerMarker() {
   // Removed the "正在辨識字母..." status update to prevent UI flashing
 
   try {
-    const { data: { text } } = await tesseractWorker.recognize(markerCanvas);
-    const cleaned = text.trim().toUpperCase();
+    const { data } = await tesseractWorker.recognize(markerCanvas);
+    const cleaned = data.text.trim().toUpperCase();
     const match = cleaned.match(/[ABCD]/);
 
-    if (match) {
+    // 嚴格過濾：必須要有 A, B, C 或 D，且信心指數要夠高(>75)，且辨識出來的文字不能是一大串雜訊(長度<=5)
+    if (match && data.confidence > 75 && cleaned.length <= 5) {
       const letter = match[0];
       if (markerCandidate === letter) {
         markerStableCount += 1;
