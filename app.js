@@ -952,7 +952,11 @@ function decodeMarkerBits() {
   const sourceSize = Math.min(video.videoWidth, video.videoHeight) * 0.56;
   const sourceX = (video.videoWidth - sourceSize) / 2;
   const sourceY = (video.videoHeight - sourceSize) / 2;
+  markerCtx.save();
+  markerCtx.translate(MARKER_SCAN_SIZE, 0);
+  markerCtx.scale(-1, 1);
   markerCtx.drawImage(video, sourceX, sourceY, sourceSize, sourceSize, 0, 0, MARKER_SCAN_SIZE, MARKER_SCAN_SIZE);
+  markerCtx.restore();
 
   const imageData = markerCtx.getImageData(0, 0, MARKER_SCAN_SIZE, MARKER_SCAN_SIZE);
   const darkness = [];
