@@ -949,7 +949,14 @@ function decodeMarkerBits() {
     return null;
   }
 
-  const sourceSize = Math.min(video.videoWidth, video.videoHeight) * 0.56;
+  const videoAspect = video.videoWidth / video.videoHeight;
+  const containerAspect = 16 / 9;
+  let sourceSize;
+  if (videoAspect < containerAspect) {
+    sourceSize = video.videoWidth * 0.42;
+  } else {
+    sourceSize = video.videoHeight * (16 / 9) * 0.42;
+  }
   const sourceX = (video.videoWidth - sourceSize) / 2;
   const sourceY = (video.videoHeight - sourceSize) / 2;
   markerCtx.save();
@@ -969,7 +976,7 @@ function decodeMarkerBits() {
   const minDark = Math.min(...darkness);
   const maxDark = Math.max(...darkness);
   const contrast = maxDark - minDark;
-  if (contrast < 0.34) return null;
+  if (contrast < 30) return null;
 
   const threshold = (minDark + maxDark) / 2;
   const bits = darkness.map((value) => (value > threshold ? "1" : "0")).join("");
