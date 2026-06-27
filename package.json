@@ -1,4 +1,11 @@
 {
+  "name": "positive-hero-ar",
+  "version": "0.1.0",
+  "description": "Positive Hero AR Challenge — webcam-based educational AR mini-game.",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "dev": "node server.js"
   }

@@ -1,4 +1,4 @@
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js";
+import * as THREE from "three";
 
 const video = document.querySelector("#webcam");
 const previewVideo = document.querySelector("#webcamPreview");
@@ -44,44 +44,7 @@ const bossWarningName = document.querySelector("#bossWarningName");
 const screenFlash = document.querySelector("#screenFlash");
 const ctx = canvas.getContext("2d");
 
-const FALLBACK_CHARACTERS = [
-  {
-    id: "gratitude",
-    name: "\u611f\u6069\u4fe0",
-    virtue: "\u611f\u6069",
-    color: "#ff8fa3",
-    image: "./assets/gratitude.png",
-  },
-  {
-    id: "goal",
-    name: "\u76ee\u6a19\u4fe0",
-    virtue: "\u76ee\u6a19",
-    color: "#ff4b35",
-    image: "./assets/goal.png",
-  },
-  {
-    id: "communication",
-    name: "\u4ea4\u6d41\u4fe0",
-    virtue: "\u4ea4\u6d41",
-    color: "#f6b85b",
-    image: "./assets/communication.png",
-  },
-  {
-    id: "challenge",
-    name: "\u6311\u6230\u4fe0",
-    virtue: "\u6311\u6230",
-    color: "#1f77d0",
-    image: "./assets/challenge.png",
-  },
-  {
-    id: "explore",
-    name: "\u63a2\u7d22\u4fe0",
-    virtue: "\u63a2\u7d22",
-    color: "#12a5d8",
-    image: "./assets/explore.png",
-  },
-];
-const CHARACTERS = window.POSITIVE_HEROES || FALLBACK_CHARACTERS;
+const CHARACTERS = window.POSITIVE_HEROES;
 
 const ENEMIES = [
   {
