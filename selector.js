@@ -2,36 +2,36 @@
   var characters = [
     {
       id: "gratitude",
-      name: "\u611f\u6069\u4fe0",
-      virtue: "\u611f\u6069",
+      name: { zh: "感恩俠", en: "Gratitude Hero" },
+      virtue: { zh: "感恩", en: "Gratitude" },
       color: "#ff8fa3",
       image: "./assets/gratitude.png",
     },
     {
       id: "goal",
-      name: "\u76ee\u6a19\u4fe0",
-      virtue: "\u76ee\u6a19",
+      name: { zh: "目標俠", en: "Goal Hero" },
+      virtue: { zh: "目標", en: "Goals" },
       color: "#ff4b35",
       image: "./assets/goal.png",
     },
     {
       id: "communication",
-      name: "\u4ea4\u6d41\u4fe0",
-      virtue: "\u4ea4\u6d41",
+      name: { zh: "交流俠", en: "Communication Hero" },
+      virtue: { zh: "交流", en: "Communication" },
       color: "#f6b85b",
       image: "./assets/communication.png",
     },
     {
       id: "challenge",
-      name: "\u6311\u6230\u4fe0",
-      virtue: "\u6311\u6230",
+      name: { zh: "挑戰俠", en: "Challenge Hero" },
+      virtue: { zh: "挑戰", en: "Challenge" },
       color: "#1f77d0",
       image: "./assets/challenge.png",
     },
     {
       id: "explore",
-      name: "\u63a2\u7d22\u4fe0",
-      virtue: "\u63a2\u7d22",
+      name: { zh: "探索俠", en: "Explorer Hero" },
+      virtue: { zh: "探索", en: "Exploration" },
       color: "#12a5d8",
       image: "./assets/explore.png",
     },
@@ -42,20 +42,48 @@
   var startButton = document.querySelector("#startButton");
   var statusText = document.querySelector("#statusText");
 
+  function getLang() {
+    return window.LANG === "en" ? "en" : "zh";
+  }
+
+  function localize(value) {
+    if (!value) return "";
+    if (typeof value === "string") return value;
+    return value[getLang()] || value.zh || "";
+  }
+
   window.POSITIVE_HEROES = characters;
   window.selectedPositiveHero = null;
+
+  var startReady = {
+    zh: "啟動 Webcam",
+    en: "Start Webcam",
+  };
+
+  var statusReady = {
+    zh: "準備就緒：請先確認角色，再開始挑戰。",
+    en: " ready: confirm your hero, then begin the challenge.",
+  };
+
+  function buildStatusText(character) {
+    var lang = getLang();
+    var name = localize(character.name);
+    if (lang === "en") {
+      return name + statusReady.en;
+    }
+    return name + " " + statusReady.zh;
+  }
 
   function setSelected(character) {
     window.selectedPositiveHero = character;
     previewMascot.src = character.image;
     startButton.disabled = false;
-    startButton.textContent = "\u555f\u52d5 Webcam";
+    startButton.textContent = startReady[getLang()] || startReady.zh;
     document.body.classList.add("has-character");
     document.body.dataset.hero = character.id;
 
     if (statusText) {
-      statusText.textContent =
-        character.name + " \u6e96\u5099\u5c31\u7dd2\uff1a\u8acb\u5148\u78ba\u8a8d\u89d2\u8272\uff0c\u518d\u958b\u59cb\u6311\u6230\u3002";
+      statusText.textContent = buildStatusText(character);
     }
 
     document.querySelectorAll(".character-card").forEach(function (card) {
@@ -84,16 +112,36 @@
       button.dataset.character = character.id;
       button.style.setProperty("--hero-color", character.color);
       image.src = character.image;
-      image.alt = character.name;
-      name.textContent = character.name;
-      virtue.textContent = character.virtue;
+      image.alt = localize(character.name);
+      name.textContent = localize(character.name);
+      virtue.textContent = localize(character.virtue);
       button.append(image, name, virtue);
       button.addEventListener("click", function () {
         setSelected(character);
       });
       characterGrid.append(button);
     });
+
+    if (window.selectedPositiveHero) {
+      document.querySelectorAll(".character-card").forEach(function (card) {
+        card.classList.toggle(
+          "is-selected",
+          card.dataset.character === window.selectedPositiveHero.id,
+        );
+      });
+    }
   }
+
+  window.rerenderCharacters = function () {
+    render();
+    if (window.selectedPositiveHero) {
+      var ch = window.selectedPositiveHero;
+      startButton.textContent = startReady[getLang()] || startReady.zh;
+      if (statusText) {
+        statusText.textContent = buildStatusText(ch);
+      }
+    }
+  };
 
   render();
   setSelected(characters[2]);

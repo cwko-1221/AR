@@ -49,86 +49,521 @@ const CHARACTERS = window.POSITIVE_HEROES;
 const ENEMIES = [
   {
     id: "comfort",
-    name: "\u5b89\u8212\u602a",
+    name: { zh: "\u5b89\u8212\u602a", en: "Comfort Beast" },
     image: "./assets/comfort-monster.png",
     x: -2.8,
   },
   {
     id: "lonely",
-    name: "\u5b64\u884c\u7378",
+    name: { zh: "\u5b64\u884c\u7378", en: "Lonely Beast" },
     image: "./assets/lonely-beast.png",
     x: -1.4,
   },
   {
     id: "reject",
-    name: "\u62d2\u7d55\u9f8d",
+    name: { zh: "\u62d2\u7d55\u9f8d", en: "Reject Dragon" },
     image: "./assets/reject-dragon.png",
     x: 0,
   },
   {
     id: "lost",
-    name: "\u8ff7\u5931\u72d0",
+    name: { zh: "\u8ff7\u5931\u72d0", en: "Lost Fox" },
     image: "./assets/lost-fox.png",
     x: 1.4,
   },
   {
     id: "entitled",
-    name: "\u7406\u6240\u7576\u733f",
+    name: { zh: "\u7406\u6240\u7576\u733f", en: "Entitled Ape" },
     image: "./assets/entitled-ape.png",
     x: 2.8,
   },
 ];
 
+const I18N = {
+  zh: {
+    "start.kicker": "\u4efb\u52d9\u6307\u4ee4 01",
+    "start.title": "\u6b63\u5411\u4fe0\u51fa\u52d5",
+    "start.body":
+      "\u4eca\u5929\u7684\u4efb\u52d9\u662f\u64ca\u9000 5 \u96bb\u300c\u8ca0\u5411\u602a\u7269\u300d\u3002\u9078\u64c7\u4e00\u4f4d\u6b63\u5411\u4fe0\u5f8c\uff0c\u5148\u5de6\u53f3\u79fb\u52d5\u907f\u958b\u653b\u64ca\uff1b\u6bcf 5 \u79d2\u5834\u4e0a\u6703\u51fa\u73fe\u661f\u661f\uff0c\u62fe\u5230\u661f\u661f\u624d\u53ef\u56de\u7b54\u6b63\u5411\u554f\u984c\u70ba\u5149\u528d\u5145\u80fd\u3002\u88ab\u64ca\u4e2d 3 \u6b21\uff0c\u4efb\u52d9\u5931\u6557\u3002",
+    "start.brief1": "\u9078\u89d2\u8272",
+    "start.brief2": "\u907f\u653b\u64ca\u3001\u62fe\u661f\u661f",
+    "start.brief3": "\u7b54\u984c\u5145\u80fd\u3001\u63ee\u528d",
+    "start.accept": "\u63a5\u53d7\u4efb\u52d9",
+    "intro.kicker": "\u4efb\u52d9\u7c21\u5831",
+    "intro.title": "\u6b63\u5411\u4fe0\uff0c\u8acb\u6e96\u5099\u6b66\u5668",
+    "intro.step1": "\u9078\u64c7\u4e00\u4f4d\u6b63\u5411\u4fe0\uff0c\u9032\u5165\u80fd\u91cf\u7adc\u6280\u5834\u3002",
+    "intro.step2":
+      "\u602a\u7269\u6703\u767c\u5c04\u653b\u64ca\uff0c\u6b63\u5411\u4fe0\u8981\u5de6\u53f3\u79fb\u52d5\u9583\u907f\uff1b\u6bcf 5 \u79d2\u62fe\u5230\u661f\u661f\uff0c\u624d\u6703\u5f48\u51fa 1 \u984c\u6b63\u5411\u554f\u984c\u3002",
+    "intro.step3":
+      "\u7b54\u5c0d 3 \u984c\u5f8c\u5149\u528d\u5145\u80fd 100%\uff0c\u5c0d\u8457 Webcam \u63ee\u528d\u65ac\u64ca\uff1b\u82e5\u88ab\u64ca\u4e2d 3 \u6b21\uff0c\u4efb\u52d9\u5931\u6557\u3002",
+    "intro.next": "\u9078\u64c7\u89d2\u8272",
+    "select.title": "\u9078\u64c7\u6b63\u5411\u4fe0",
+    "select.body":
+      "\u9078\u597d\u89d2\u8272\u5f8c\uff0c\u9032\u5165\u602a\u7378\u9396\u5b9a\u5834\u666f\u3002\u5148\u907f\u958b\u653b\u64ca\uff0c\u62fe\u5230\u661f\u661f\u5f8c\u56de\u7b54\u554f\u984c\u70ba\u5149\u528d\u5145\u80fd\u3002",
+    "select.confirm": "\u78ba\u5b9a\u89d2\u8272",
+    "hud.round": "Round",
+    "hud.score": "Score",
+    "hud.move": "Move",
+    "hud.combo": "Combo",
+    "hud.time": "Time",
+    "hud.start": "\u555f\u52d5 Webcam",
+    "hud.starting": "\u904a\u6232\u9032\u884c\u4e2d",
+    "hud.answer": "\u7b54\u984c\u5145\u80fd",
+    "enemyHud.label": "\u602a\u7269\u76ee\u6a19",
+    "hero.label": "\u6b63\u5411\u4fe0 HP",
+    "mission.kicker": "\u7b54\u984c\u5145\u80fd",
+    "mission.current": "\u7576\u524d\u602a\u7269",
+    "mission.energy": "Energy",
+    "mission.markerPrompt": "\u8acb\u628a\u5361\u7247\u4e0a\u7684 A/B/C/D \u5b57\u6bcd\u653e\u5230 Webcam \u4e2d\u592e\u6846\u5167\u3002",
+    "mission.markerCenter": "\u8acb\u5c07\u5b57\u6bcd A/B/C/D \u5c0d\u6e96\u4e2d\u592e\u6846\u5167",
+    "mission.markerInsert": "\u8acb\u628a A/B/C/D Marker \u5361\u653e\u5165 Webcam \u4e2d\u592e\u6846\u3002",
+    "mission.scanning": "\u6383\u63cf\u4e2d\uff1a{letter}",
+    "mission.recognized": "\u5df2\u8b80\u53d6 {letter}",
+    "mission.complete": "\u6311\u6230\u5b8c\u6210\uff01",
+    "mission.skillHint": "\u7b54\u5c0d\u4e09\u984c\u5145\u80fd\u5149\u528d\uff0c100% \u5f8c\u56de\u5230\u5834\u666f\u63ee\u528d\u65ac\u64ca\u3002",
+    "mission.skillReadyHint": "\u5149\u528d\u5df2\u5b8c\u6210\u5145\u80fd\uff1a\u5728 Webcam \u524d\u5feb\u901f\u6a6b\u63ee\u53f3\u624b\uff0c\u6216\u96d9\u624b\u8209\u9ad8\u91cb\u653e\u7d42\u7d50\u6280\u80fd\u3002",
+    "mission.skillReadyMarkerHint": "\u5145\u80fd 100%\uff01\u56de\u5230\u5834\u666f\u63ee\u52d5\u5b57\u6bcd\u5361\uff0c\u91cb\u653e\u5149\u528d\u65ac\u64ca\u3002",
+    "mission.markerScanHint": "\u628a A/B/C/D Marker \u5361\u653e\u5230 Webcam \u4e2d\u592e\u6846\uff0c\u7cfb\u7d71\u6383\u5230\u5f8c\u6703\u81ea\u52d5\u7b54\u984c\u5145\u80fd\u3002",
+    "mission.full": "\u5145\u80fd 100%\uff01\u8acb\u56de\u5230\u5834\u666f\uff0c\u63e1\u7dca\u5b57\u6bcd\u5361\u5411\u602a\u7378\u63ee\u528d\u3002",
+    "mission.allClear": "\u6240\u6709\u602a\u7378\u5df2\u88ab\u64ca\u6557\uff01\u4f60\u5df2\u5b8c\u6210\u6b63\u5411\u6311\u6230\u3002",
+    "status.allMonsterDone": "\u5df2\u5b8c\u6210",
+    "panel.kickerLockOn": "LOCK ON",
+    "panel.title": "\u6b63\u5411\u4fe0 AR Challenge",
+    "panel.statusInitial": "\u4ea4\u6d41\u4fe0\u6e96\u5099\u5c31\u7dd2\uff1a\u8acb\u5148\u78ba\u8a8d\u89d2\u8272\uff0c\u518d\u958b\u59cb\u6311\u6230\u3002",
+    "panel.statusReady": "{name} \u6e96\u5099\u5c31\u7dd2\uff1a\u8acb\u5148\u78ba\u8a8d\u89d2\u8272\uff0c\u518d\u958b\u59cb\u6311\u6230\u3002",
+    "back.toGame": "\u56de\u5230\u5834\u666f",
+    "victory.kicker": "VICTORY",
+    "victory.title": "\u6b63\u5411\u80fd\u91cf\u5168\u90e8\u89e3\u653e",
+    "victory.body": "\u6210\u529f\u64ca\u9000\u6240\u6709\u602a\u7269\uff0c\u5b8c\u6210\u6b63\u5411\u6311\u6230\u3002",
+    "victory.bodyScore": "\u4f60\u64ca\u6557\u4e86 {n} \u96bb\u602a\u7378\uff0c\u7e3d\u5206 {score}\uff01",
+    "victory.restart": "\u518d\u73a9\u4e00\u6b21",
+    "victory.failedKicker": "MISSION FAILED",
+    "victory.failedTitle": "\u4efb\u52d9\u5931\u6557",
+    "victory.failedBody":
+      "\u6b63\u5411\u4fe0\u88ab\u64ca\u4e2d 3 \u6b21\uff0c\u4efb\u52d9\u5931\u6557\u3002\u4e0b\u6b21\u8a18\u5f97\u5de6\u53f3\u79fb\u52d5\u8eb2\u958b\u653b\u64ca\uff0c\u62fe\u5230\u661f\u661f\u624d\u7b54\u984c\u5145\u80fd\uff01",
+    "bossWarning.label": "WARNING",
+    "bossWarning.ready": "\u602a\u7269\u5165\u4fb5 - GET READY",
+    "phase.lockOn": "LOCK ON",
+    "phase.battle": "BATTLE",
+    "phase.strike": "STRIKE",
+    "phase.scan": "SCAN",
+    "phase.clear": "CLEAR",
+    "phase.failed": "FAILED",
+    "phase.warning": "WARNING",
+    "phase.boss": "BOSS",
+    "phase.hero": "HERO",
+    "phase.dodge": "DODGE",
+    "phase.charge": "CHARGE",
+    "phase.full": "100%",
+    "status.charge100Back": "\u5145\u80fd 100%\uff01\u63e1\u7dca\u5b57\u6bcd\u5361\uff0c\u5c0d\u8457 Webcam \u63ee\u51fa\u5149\u528d\u65ac\u64ca\u3002",
+    "status.monsterLocked": "\u602a\u7378\u9396\u5b9a\uff01\u6b63\u5411\u4fe0\uff0c\u8acb\u5de6\u53f3\u79fb\u52d5\u907f\u958b\u653b\u64ca\u3002",
+    "status.scanLetter": "\u8acb\u8209\u8d77\u6b63\u78ba\u7684 A/B/C/D \u5b57\u6bcd\u5361\uff0c\u6216\u6309\u756b\u9762\u7b54\u6848\u6383\u63cf\u3002",
+    "status.failed": "\u6b63\u5411\u4fe0\u88ab\u64ca\u4e2d 3 \u6b21\uff0c\u4efb\u52d9\u5931\u6557\u3002\u8acb\u518d\u6311\u6230\u4e00\u6b21\uff01",
+    "status.starAppeared": "\u5145\u80fd\u661f\u661f\u51fa\u73fe\u5728\u6b63\u5411\u4fe0\u7684\u79fb\u52d5\u8def\u5f91\u4e0a\uff01\u5de6\u53f3\u79fb\u52d5\u53bb\u62fe\u53d6\u661f\u661f\u3002",
+    "status.questionStart": "\u62fe\u5230\u5145\u80fd\u661f\u661f\uff01\u73fe\u5728\u56de\u7b54\u4e00\u984c\u70ba\u5149\u528d\u5145\u80fd\u3002",
+    "status.dodgeFirst": "\u5148\u9583\u907f\u602a\u7378\u653b\u64ca\uff01\u6bcf 5 \u79d2\u5834\u4e0a\u6703\u51fa\u73fe\u661f\u661f\uff0c\u62fe\u5230\u661f\u661f\u624d\u80fd\u7b54\u984c\u5145\u80fd\u3002",
+    "status.dangerStart": "\u5371\u96aa\u53cd\u61c9\uff01\u602a\u7378\u6b63\u5728\u5165\u4fb5\uff0c\u6e96\u5099\u555f\u52d5 Webcam\u3002",
+    "status.bossLanded": "\u602a\u7378\u767b\u5834\uff01\u8acb\u6e96\u5099\u6b63\u5411\u5149\u528d\u3002",
+    "status.heroLanded": "{name} \u767b\u5834\uff01\u5148\u5de6\u53f3\u79fb\u52d5\u907f\u958b\u602a\u7378\u653b\u64ca\u3002",
+    "status.dodgeTrain":
+      "\u602a\u7378\u767c\u5c04\u80fd\u91cf\u5f48\uff01\u7528 Webcam \u5de6\u53f3\u79fb\u52d5\u9583\u907f\uff0c\u6c92\u6709\u93e1\u982d\u6642\u53ef\u7528 A/D \u6216\u5de6\u53f3\u9375\u6e2c\u8a66\u3002",
+    "status.hitWarn":
+      "\u88ab\u64ca\u4e2d\u4e86\uff01\u88ab\u64ca\u4e2d 3 \u6b21\u6703\u4efb\u52d9\u5931\u6557\u3002\u5de6\u53f3\u79fb\u52d5\u9583\u958b\u653b\u64ca\uff0c\u62fe\u661f\u661f\u624d\u80fd\u7b54\u984c\u3002",
+    "status.dodgeSuccess":
+      "\u9583\u907f\u6210\u529f\uff01\u7e7c\u7e8c\u79fb\u52d5\u8eb2\u653b\u64ca\uff0c\u5834\u4e0a\u51fa\u73fe\u661f\u661f\u5f8c\u62fe\u53d6\u624d\u6703\u7b54\u984c\u3002",
+    "status.skillReadyBack":
+      "\u5145\u80fd 100%\uff01\u5149\u528d\u5df2\u89e3\u653e\uff0c\u56de\u5230\u5834\u666f\u6e96\u5099\u65ac\u64ca\u3002",
+    "status.scanSuccess": "\u6383\u63cf\u6210\u529f\uff01\u5149\u528d\u5145\u80fd\u4e0a\u5347\u3002",
+    "status.wrong": "\u7b54\u932f\u4e86\uff01\u8acb\u56de\u5230\u5834\u666f\u4e2d\u91cd\u65b0\u6536\u96c6\u661f\u661f\u518d\u6311\u6230\u3002",
+    "status.victoryStrike": "VICTORY! \u5149\u528d\u65ac\u64ca\u6210\u529f\uff0c\u602a\u7378\u5316\u70ba\u5149\u9ede\u6d88\u5931\u3002",
+    "status.warmingTracker": "\u6b63\u5728\u8f09\u5165\u52d5\u4f5c\u8ffd\u8e64\u6a21\u578b...",
+    "status.cameraOnly": "\u5df2\u555f\u52d5 Webcam\uff0c\u52d5\u4f5c\u8ffd\u8e64\u6b63\u5728\u5f8c\u5099\u6a21\u5f0f\u3002",
+    "status.cameraReady": "{name} \u5df2\u51fa\u52d5\uff01\u8acb\u6309\u300c\u7b54\u984c\u5145\u80fd\u300d\u70ba\u5149\u528d\u5132\u6eff\u80fd\u91cf\u3002",
+    "status.cameraError":
+      "\u7121\u6cd5\u555f\u52d5 Webcam\uff1a\u8acb\u5141\u8a31\u76f8\u6a5f\u6b0a\u9650\uff0c\u4e26\u7528 localhost \u6216 HTTPS \u958b\u555f\u9801\u9762\u3002",
+    "status.pickHero": "\u8acb\u5148\u9078\u64c7\u4e00\u4f4d\u6b63\u5411\u4fe0\u3002",
+    "toast.charge100": "\u5145\u80fd 100%\uff1a\u63ee\u528d\u65ac\u64ca",
+    "toast.charge100Plain": "\u5145\u80fd 100%\uff01",
+    "toast.monsterLocked": "\u602a\u7378\u9396\u5b9a",
+    "toast.scanCard": "\u6383\u63cf\u5b57\u6bcd\u5361\u5145\u80fd",
+    "toast.missionComplete": "\u4efb\u52d9\u5b8c\u6210",
+    "toast.starAppeared": "\u661f\u661f\u51fa\u73fe\uff01\u62fe\u53d6\u5f8c\u7b54\u984c\u5145\u80fd",
+    "toast.starCharge": "\u661f\u661f\u5145\u80fd\uff1a\u7b54\u984c\u958b\u59cb",
+    "toast.wrong": "\u7b54\u932f\u4e86\uff01\u8acb\u91cd\u65b0\u6536\u96c6\u661f\u661f",
+    "toast.dodgeStart": "\u8eb2\u653b\u64ca + \u62fe\u661f\u661f\u624d\u7b54\u984c",
+    "toast.dodgeSuccess": "\u9583\u907f\u6210\u529f\uff01\u7559\u610f\u661f\u661f",
+    "toast.hitBy": "\u88ab\u602a\u7378\u653b\u64ca\uff01HP {hp} / {max}",
+    "toast.timeWarn": "\u6642\u9593\u8b66\u5831\uff01Combo \u91cd\u7f6e",
+    "toast.dangerStart": "\u5371\u96aa\u97f3\u6a02\u555f\u52d5",
+    "toast.dodgeAttack": "\u9583\u907f\u653b\u64ca\uff1a\u5de6\u53f3\u79fb\u52d5",
+    "toast.victoryStrike": "VICTORY! \u5149\u528d\u65ac\u64ca\u6210\u529f",
+    "toast.chargePct": "\u5145\u80fd {pct}%",
+    "toast.missionFailed": "\u4efb\u52d9\u5931\u6557\uff01\u6b63\u5411\u4fe0\u88ab\u64ca\u4e2d 3 \u6b21",
+    "lang.toggle": "EN",
+    "ui.langLabel": "\u8a9e\u8a00",
+  },
+  en: {
+    "start.kicker": "Mission Brief 01",
+    "start.title": "Positive Hero Mobilize",
+    "start.body":
+      "Today's mission: defeat 5 \"negative monsters.\" Choose a Positive Hero, then move left/right to dodge attacks. A star appears every 5 seconds \u2014 grab one to answer a positive question and charge your saber. Get hit 3 times and the mission fails.",
+    "start.brief1": "Pick a hero",
+    "start.brief2": "Dodge & grab stars",
+    "start.brief3": "Answer & swing",
+    "start.accept": "Accept Mission",
+    "intro.kicker": "Mission Briefing",
+    "intro.title": "Hero, prepare your weapon",
+    "intro.step1": "Pick a Positive Hero and enter the energy arena.",
+    "intro.step2":
+      "Monsters fire attacks \u2014 move left/right to dodge. Every 5 seconds you can grab a star to unlock 1 positive question.",
+    "intro.step3":
+      "Answer 3 correctly to charge the saber to 100%, then slash at the Webcam. Get hit 3 times and the mission fails.",
+    "intro.next": "Choose Hero",
+    "select.title": "Choose a Positive Hero",
+    "select.body":
+      "After choosing, enter the monster lock-on scene. Dodge attacks first, then grab stars and answer questions to charge the saber.",
+    "select.confirm": "Confirm",
+    "hud.round": "Round",
+    "hud.score": "Score",
+    "hud.move": "Move",
+    "hud.combo": "Combo",
+    "hud.time": "Time",
+    "hud.start": "Start Webcam",
+    "hud.starting": "Game running",
+    "hud.answer": "Answer to Charge",
+    "enemyHud.label": "Target",
+    "hero.label": "Hero HP",
+    "mission.kicker": "Answer to Charge",
+    "mission.current": "Current Monster",
+    "mission.energy": "Energy",
+    "mission.markerPrompt": "Place the A/B/C/D letter card in the center frame of the Webcam.",
+    "mission.markerCenter": "Align an A/B/C/D letter with the center frame",
+    "mission.markerInsert": "Place the A/B/C/D marker card in the Webcam's center frame.",
+    "mission.scanning": "Scanning: {letter}",
+    "mission.recognized": "Read {letter}",
+    "mission.complete": "Challenge complete!",
+    "mission.skillHint":
+      "Answer 3 correctly to fully charge the saber. At 100%, return to the stage and slash.",
+    "mission.skillReadyHint":
+      "Saber fully charged: swing your right hand horizontally in front of the Webcam, or raise both hands to release the finishing skill.",
+    "mission.skillReadyMarkerHint":
+      "Charged 100%! Return to the stage, swing your letter card, and unleash the saber slash.",
+    "mission.markerScanHint":
+      "Place the A/B/C/D marker card in the center frame \u2014 the system auto-answers and charges when detected.",
+    "mission.full":
+      "Charged 100%! Return to the stage, hold your letter card, and slash at the monster.",
+    "mission.allClear": "All monsters defeated! Positive challenge complete.",
+    "status.allMonsterDone": "Done",
+    "panel.kickerLockOn": "LOCK ON",
+    "panel.title": "Positive Hero AR Challenge",
+    "panel.statusInitial":
+      "Communication Hero ready: confirm your hero, then begin the challenge.",
+    "panel.statusReady": "{name} ready: confirm your hero, then begin the challenge.",
+    "back.toGame": "Back to Stage",
+    "victory.kicker": "VICTORY",
+    "victory.title": "Positive Energy Unleashed",
+    "victory.body": "You defeated every monster \u2014 positive challenge complete.",
+    "victory.bodyScore": "You defeated {n} monsters with a total score of {score}!",
+    "victory.restart": "Play Again",
+    "victory.failedKicker": "MISSION FAILED",
+    "victory.failedTitle": "Mission Failed",
+    "victory.failedBody":
+      "Hero was hit 3 times \u2014 mission failed. Next time, dodge left and right, and answer questions only after collecting stars!",
+    "bossWarning.label": "WARNING",
+    "bossWarning.ready": "Monster incoming - GET READY",
+    "phase.lockOn": "LOCK ON",
+    "phase.battle": "BATTLE",
+    "phase.strike": "STRIKE",
+    "phase.scan": "SCAN",
+    "phase.clear": "CLEAR",
+    "phase.failed": "FAILED",
+    "phase.warning": "WARNING",
+    "phase.boss": "BOSS",
+    "phase.hero": "HERO",
+    "phase.dodge": "DODGE",
+    "phase.charge": "CHARGE",
+    "phase.full": "100%",
+    "status.charge100Back":
+      "Charged 100%! Hold your letter card and slash at the Webcam to unleash the saber.",
+    "status.monsterLocked":
+      "Monster locked on! Hero, move left and right to dodge incoming attacks.",
+    "status.scanLetter":
+      "Raise the correct A/B/C/D card, or tap the on-screen answer to scan.",
+    "status.failed":
+      "Hero was hit 3 times \u2014 mission failed. Try the challenge again!",
+    "status.starAppeared":
+      "A charge star has appeared on the hero's path! Move left/right to grab it.",
+    "status.questionStart":
+      "Charge star collected! Answer one question to power the saber.",
+    "status.dodgeFirst":
+      "Dodge the monster's attacks first! A star appears every 5 seconds \u2014 collect one to unlock a question.",
+    "status.dangerStart":
+      "Danger response! A monster is invading \u2014 get the Webcam ready.",
+    "status.bossLanded": "Monster arrives! Ready the positive saber.",
+    "status.heroLanded": "{name} enters! Move left and right to dodge attacks.",
+    "status.dodgeTrain":
+      "Monster energy ball incoming! Move left/right with the Webcam \u2014 without a camera, use A/D or arrow keys to test.",
+    "status.hitWarn":
+      "Hit! Three hits ends the mission. Move left/right to dodge, and grab stars before answering questions.",
+    "status.dodgeSuccess":
+      "Dodge success! Keep moving \u2014 once a star appears, grab it to unlock a question.",
+    "status.skillReadyBack":
+      "Charged 100%! The saber is ready \u2014 return to the stage and prepare to slash.",
+    "status.scanSuccess": "Scan success! Saber charge rising.",
+    "status.wrong":
+      "Wrong answer! Return to the stage and collect another star before trying again.",
+    "status.victoryStrike":
+      "VICTORY! Saber slash succeeded \u2014 the monster dissolves into light.",
+    "status.warmingTracker": "Loading the motion-tracking model...",
+    "status.cameraOnly":
+      "Webcam started. Motion tracking is running in fallback mode.",
+    "status.cameraReady":
+      "{name} is in action! Press \"Answer to Charge\" to power the saber.",
+    "status.cameraError":
+      "Can't start the Webcam: allow camera permission, and open the page from localhost or HTTPS.",
+    "status.pickHero": "Choose a Positive Hero first.",
+    "toast.charge100": "100% Charged: Slash!",
+    "toast.charge100Plain": "Charged 100%!",
+    "toast.monsterLocked": "Monster locked",
+    "toast.scanCard": "Scan card to charge",
+    "toast.missionComplete": "Mission complete",
+    "toast.starAppeared": "Star appeared! Grab it to unlock a question",
+    "toast.starCharge": "Star charge: question time",
+    "toast.wrong": "Wrong! Grab another star",
+    "toast.dodgeStart": "Dodge & grab stars before answering",
+    "toast.dodgeSuccess": "Dodge success! Watch for stars",
+    "toast.hitBy": "Hit by monster! HP {hp} / {max}",
+    "toast.timeWarn": "Time warning! Combo reset",
+    "toast.dangerStart": "Danger music engaged",
+    "toast.dodgeAttack": "Dodge: move left & right",
+    "toast.victoryStrike": "VICTORY! Saber slash succeeded",
+    "toast.chargePct": "Charge {pct}%",
+    "toast.missionFailed": "Mission failed! Hero hit 3 times",
+    "lang.toggle": "\u4e2d",
+    "ui.langLabel": "Lang",
+  },
+};
+
+const LANG_STORAGE_KEY = "ar-lang";
+
+function getCurrentLang() {
+  return window.LANG === "en" ? "en" : "zh";
+}
+
+function t(key, vars) {
+  const lang = getCurrentLang();
+  const dict = I18N[lang] || I18N.zh;
+  let value = dict[key];
+  if (value === undefined) value = I18N.zh[key] ?? key;
+  if (vars) {
+    value = value.replace(/\{(\w+)\}/g, (_, name) =>
+      vars[name] !== undefined ? vars[name] : `{${name}}`,
+    );
+  }
+  return value;
+}
+
+function localize(name) {
+  if (!name) return "";
+  if (typeof name === "string") return name;
+  return name[getCurrentLang()] || name.zh || "";
+}
+
 const QUESTIONS = [
   {
-    text: "\u670b\u53cb\u4e0d\u9858\u610f\u8ddf\u4f60\u5408\u4f5c\u6642\uff0c\u600e\u6a23\u505a\u6700\u6b63\u5411\uff1f",
+    text: {
+      zh: "\u7576\u670b\u53cb\u5c0d\u4f60\u8aaa\u4e86\u4e0d\u958b\u5fc3\u7684\u8a71\uff0c\u600e\u6a23\u56de\u61c9\u6700\u6210\u719f\uff1f",
+      en: "When a friend says something hurtful, what's the most mature response?",
+    },
     answers: [
-      "\u5148\u807d\u4ed6\u7684\u60f3\u6cd5\uff0c\u518d\u4e00\u8d77\u627e\u65b9\u6cd5",
-      "\u7acb\u5373\u653e\u68c4\u5408\u4f5c",
-      "\u53ea\u8cac\u602a\u5c0d\u65b9",
-      "\u6545\u610f\u4e0d\u7406\u6703\u4ed6",
+      { zh: "\u7acb\u523b\u7f75\u56de\u53bb", en: "Yell back immediately" },
+      { zh: "\u4e0d\u518d\u8ddf\u4ed6\u505a\u670b\u53cb", en: "Cut off the friendship right away" },
+      { zh: "\u51b7\u975c\u5f8c\u8ddf\u4ed6\u8aaa\u81ea\u5df1\u7684\u611f\u53d7", en: "Calm down, then share how you feel" },
+      { zh: "\u5728\u80cc\u5f8c\u8aaa\u4ed6\u7684\u58de\u8a71", en: "Talk badly about him behind his back" },
+    ],
+    correct: 2,
+  },
+  {
+    text: {
+      zh: "\u8003\u8a66\u6210\u7e3e\u4e0d\u7406\u60f3\u6642\uff0c\u6700\u6709\u7528\u7684\u60f3\u6cd5\u662f\uff1f",
+      en: "When your exam result is poor, the most useful mindset is:",
+    },
+    answers: [
+      { zh: "\u627e\u51fa\u5f31\u9ede\u4e26\u6539\u5584", en: "Identify weaknesses and improve" },
+      { zh: "\u6c38\u9060\u653e\u68c4\u9019\u4e00\u79d1", en: "Give up on the subject forever" },
+      { zh: "\u602a\u8001\u5e2b\u51fa\u984c\u592a\u96e3", en: "Blame the teacher for hard questions" },
+      { zh: "\u5047\u88dd\u6c92\u4e8b\u767c\u751f", en: "Pretend nothing happened" },
     ],
     correct: 0,
   },
   {
-    text: "\u5982\u679c\u4eca\u5929\u5931\u6557\u4e86\uff0c\u4e0b\u4e00\u6b65\u53ef\u4ee5\u600e\u6a23\uff1f",
+    text: {
+      zh: "\u5abd\u5abd\u716e\u4e86\u4f60\u4e0d\u611b\u5403\u7684\u83dc\uff0c\u6700\u6709\u79ae\u8c8c\u7684\u53cd\u61c9\u662f\uff1f",
+      en: "Mom cooked something you don't like \u2014 the most polite reaction is:",
+    },
     answers: [
-      "\u627e\u51fa\u53ef\u4ee5\u6539\u9032\u7684\u4e00\u9ede",
-      "\u8a8d\u5b9a\u81ea\u5df1\u6c38\u9060\u505a\u4e0d\u5230",
-      "\u628a\u60c5\u7dd2\u767c\u6d29\u5728\u5225\u4eba\u8eab\u4e0a",
-      "\u4e0d\u518d\u5617\u8a66\u4efb\u4f55\u65b0\u4e8b\u60c5",
+      { zh: "\u76f4\u63a5\u628a\u7897\u63a8\u958b", en: "Push the bowl away" },
+      { zh: "\u5927\u8072\u8aaa\u300c\u597d\u96e3\u5403\u300d", en: "Loudly say \"this tastes awful\"" },
+      { zh: "\u4e0d\u5403\u4e5f\u4e0d\u8aaa\u8a71", en: "Stay silent and refuse to eat" },
+      { zh: "\u8b1d\u8b1d\u5abd\u5abd\uff0c\u518d\u8aaa\u81ea\u5df1\u7684\u559c\u597d", en: "Thank mom, then share your preference" },
+    ],
+    correct: 3,
+  },
+  {
+    text: {
+      zh: "\u8a02\u76ee\u6a19\u6642\u6700\u8070\u660e\u7684\u65b9\u6cd5\u662f\uff1f",
+      en: "The smartest way to set a goal is:",
+    },
+    answers: [
+      { zh: "\u8a02\u4e00\u500b\u4e0d\u53ef\u80fd\u9054\u5230\u7684\u76ee\u6a19", en: "Set an impossible target" },
+      { zh: "\u628a\u5927\u76ee\u6a19\u5207\u6210\u5c0f\u6b65\u9a5f", en: "Break a big goal into small steps" },
+      { zh: "\u5f9e\u4e0d\u5beb\u4e0b\u4f86", en: "Never write it down" },
+      { zh: "\u7b49\u5225\u4eba\u66ff\u4f60\u6c7a\u5b9a", en: "Wait for others to decide for you" },
+    ],
+    correct: 1,
+  },
+  {
+    text: {
+      zh: "\u7b2c\u4e00\u6b21\u5617\u8a66\u4e00\u4ef6\u65b0\u4e8b\u60c5\u6642\uff0c\u6b63\u78ba\u7684\u5fc3\u614b\u662f\uff1f",
+      en: "The right mindset when trying something new for the first time is:",
+    },
+    answers: [
+      { zh: "\u5373\u4f7f\u505a\u4e0d\u597d\uff0c\u4e5f\u662f\u5b78\u7fd2", en: "Even if I do poorly, I'm learning" },
+      { zh: "\u4e00\u6b21\u5c31\u8981\u505a\u5230\u5b8c\u7f8e", en: "Must be perfect on the first try" },
+      { zh: "\u4e0d\u5982\u4e0d\u8981\u8a66", en: "Better not to try at all" },
+      { zh: "\u5077\u5077\u770b\u5225\u4eba\u600e\u6a23\u505a\u5c31\u6284", en: "Secretly copy others" },
     ],
     correct: 0,
   },
   {
-    text: "\u770b\u898b\u540c\u5b78\u5e6b\u5fd9\u6642\uff0c\u54ea\u4e00\u53e5\u6700\u80fd\u8868\u9054\u611f\u6069\uff1f",
+    text: {
+      zh: "\u8ddf\u540c\u5b78\u610f\u898b\u4e0d\u540c\u6642\uff0c\u600e\u6a23\u6700\u6709\u6548\u89e3\u6c7a\uff1f",
+      en: "When you disagree with a classmate, the most effective way to resolve it is:",
+    },
     answers: [
-      "\u8b1d\u8b1d\u4f60\uff0c\u4f60\u7684\u5e6b\u5fd9\u5c0d\u6211\u5f88\u91cd\u8981",
-      "\u9019\u662f\u4f60\u61c9\u8a72\u505a\u7684",
-      "\u6211\u4e0d\u9700\u8981\u8aaa\u8b1d\u8b1d",
-      "\u4e0b\u6b21\u624d\u518d\u7b97",
+      { zh: "\u5927\u8072\u84cb\u904e\u5c0d\u65b9", en: "Talk louder than them" },
+      { zh: "\u99ac\u4e0a\u8a8d\u8f38", en: "Give in immediately" },
+      { zh: "\u8046\u807d\u5c0d\u65b9\u518d\u8aaa\u81ea\u5df1\u7684\u770b\u6cd5", en: "Listen first, then share your view" },
+      { zh: "\u62d2\u7d55\u518d\u6e9d\u901a", en: "Refuse to talk again" },
+    ],
+    correct: 2,
+  },
+  {
+    text: {
+      zh: "\u505a\u932f\u4e8b\u88ab\u767c\u73fe\u6642\uff0c\u8aa0\u5be6\u7684\u505a\u6cd5\u662f\uff1f",
+      en: "When caught doing something wrong, the honest action is:",
+    },
+    answers: [
+      { zh: "\u6492\u8b0a\u63a8\u5378\u8cac\u4efb", en: "Lie to shift the blame" },
+      { zh: "\u627f\u8a8d\u4e26\u9053\u6b49", en: "Admit it and apologize" },
+      { zh: "\u602a\u5225\u4eba\u5bb3\u4f60", en: "Blame others" },
+      { zh: "\u9003\u907f\u4e0d\u51fa\u73fe", en: "Hide and avoid showing up" },
+    ],
+    correct: 1,
+  },
+  {
+    text: {
+      zh: "\u770b\u5230\u540c\u5b78\u5728\u54ed\uff0c\u6700\u9ad4\u8cbc\u7684\u505a\u6cd5\u662f\uff1f",
+      en: "Seeing a classmate crying, the most caring action is:",
+    },
+    answers: [
+      { zh: "\u5047\u88dd\u6c92\u770b\u898b", en: "Pretend not to see" },
+      { zh: "\u7b11\u4ed6\u8edf\u5f31", en: "Laugh at them for being weak" },
+      { zh: "\u99ac\u4e0a\u544a\u8a34\u5168\u73ed", en: "Tell the whole class" },
+      { zh: "\u8f15\u8072\u554f\u4ed6\u9700\u4e0d\u9700\u8981\u5e6b\u52a9", en: "Gently ask if they need help" },
+    ],
+    correct: 3,
+  },
+  {
+    text: {
+      zh: "\u5b8c\u6210\u529f\u8ab2\u6700\u6709\u6548\u7387\u7684\u65b9\u6cd5\u662f\uff1f",
+      en: "The most effective way to finish homework is:",
+    },
+    answers: [
+      { zh: "\u5148\u505a\u96e3\u7684\uff0c\u518d\u505a\u5bb9\u6613\u7684", en: "Tackle the hard ones first, then easy ones" },
+      { zh: "\u4e00\u908a\u73a9\u624b\u6a5f\u4e00\u908a\u505a", en: "Do it while playing on your phone" },
+      { zh: "\u62d6\u5230\u6700\u5f8c\u4e00\u523b", en: "Wait until the last minute" },
+      { zh: "\u6284\u5225\u4eba\u7684\u7b54\u6848", en: "Copy someone else's answers" },
     ],
     correct: 0,
   },
   {
-    text: "\u8a02\u7acb\u76ee\u6a19\u6642\uff0c\u54ea\u4e00\u500b\u505a\u6cd5\u6bd4\u8f03\u597d\uff1f",
+    text: {
+      zh: "\u88ab\u8001\u5e2b\u6279\u8a55\u6642\uff0c\u6210\u9577\u578b\u7684\u53cd\u61c9\u662f\uff1f",
+      en: "When the teacher criticizes you, a growth-oriented response is:",
+    },
     answers: [
-      "\u5b9a\u4e00\u500b\u5177\u9ad4\u3001\u53ef\u884c\u7684\u5c0f\u6b65\u9a5f",
-      "\u53ea\u8aaa\u300c\u6211\u8981\u8b8a\u5f97\u5f88\u5f37\u300d",
-      "\u4e0d\u7528\u8a08\u5283\uff0c\u7b49\u5fc3\u60c5\u597d\u518d\u505a",
-      "\u76ee\u6a19\u8d8a\u6a21\u7cca\u8d8a\u597d",
+      { zh: "\u5728\u5fc3\u88e1\u8a0e\u53ad\u8001\u5e2b", en: "Resent the teacher silently" },
+      { zh: "\u5f9e\u6b64\u4e0d\u4ea4\u529f\u8ab2", en: "Stop turning in homework" },
+      { zh: "\u60f3\u60f3\u54ea\u88e1\u53ef\u4ee5\u6539\u9032", en: "Think about what can be improved" },
+      { zh: "\u5c0d\u5176\u4ed6\u540c\u5b78\u767c\u813e\u6c23", en: "Take it out on classmates" },
+    ],
+    correct: 2,
+  },
+  {
+    text: {
+      zh: "\u5728\u773e\u4eba\u524d\u6f14\u8b1b\u6703\u7dca\u5f35\uff0c\u6700\u597d\u7684\u6e96\u5099\u662f\uff1f",
+      en: "You feel nervous about public speaking \u2014 the best preparation is:",
+    },
+    answers: [
+      { zh: "\u5b8c\u5168\u4e0d\u7df4\u7fd2", en: "Don't practice at all" },
+      { zh: "\u591a\u6b21\u7df4\u7fd2\u4e26\u6df1\u547c\u5438", en: "Practice multiple times and breathe deeply" },
+      { zh: "\u88dd\u75c5\u8acb\u5047", en: "Fake illness to skip it" },
+      { zh: "\u5168\u7a0b\u4f4e\u982d\u770b\u5730\u4e0b", en: "Stare at the floor the whole time" },
+    ],
+    correct: 1,
+  },
+  {
+    text: {
+      zh: "\u65b0\u540c\u5b78\u7b2c\u4e00\u5929\u4e0a\u5b78\uff0c\u600e\u6a23\u5c55\u73fe\u540c\u7406\u5fc3\uff1f",
+      en: "A new student joins on day one \u2014 how do you show empathy?",
+    },
+    answers: [
+      { zh: "\u4e0d\u7406\u6703\u4ed6", en: "Ignore them" },
+      { zh: "\u7b11\u4ed6\u53e3\u97f3\u5947\u602a", en: "Mock their accent" },
+      { zh: "\u5728\u4ed6\u80cc\u5f8c\u8b70\u8ad6", en: "Gossip behind their back" },
+      { zh: "\u4e3b\u52d5\u6253\u62db\u547c\u5e36\u4ed6\u8a8d\u8b58\u74b0\u5883", en: "Greet them and show them around" },
+    ],
+    correct: 3,
+  },
+  {
+    text: {
+      zh: "\u7b54\u61c9\u4e86\u670b\u53cb\u7684\u4e8b\u537b\u4f86\u4e0d\u53ca\u505a\uff0c\u8ca0\u8cac\u4efb\u7684\u505a\u6cd5\u662f\uff1f",
+      en: "You promised a friend something but can't deliver in time \u2014 the responsible action is:",
+    },
+    answers: [
+      { zh: "\u63d0\u65e9\u544a\u8a34\u4ed6\u4e26\u89e3\u91cb\u539f\u56e0", en: "Tell them early and explain why" },
+      { zh: "\u5047\u88dd\u5fd8\u8a18", en: "Pretend you forgot" },
+      { zh: "\u7b49\u4ed6\u4f86\u7f75\u4f60", en: "Wait for them to confront you" },
+      { zh: "\u602a\u4e8b\u60c5\u592a\u591a", en: "Blame having too much going on" },
     ],
     correct: 0,
   },
   {
-    text: "\u9047\u5230\u65b0\u6311\u6230\u6642\uff0c\u54ea\u500b\u60f3\u6cd5\u6700\u6709\u52a9\u6210\u9577\uff1f",
+    text: {
+      zh: "\u6bd4\u8cfd\u8f38\u4e86\u4e4b\u5f8c\uff0c\u6700\u6709\u97cc\u6027\u7684\u60f3\u6cd5\u662f\uff1f",
+      en: "After losing a competition, the most resilient thought is:",
+    },
     answers: [
-      "\u6211\u53ef\u4ee5\u5148\u5617\u8a66\uff0c\u518d\u5f9e\u7d93\u9a57\u4e2d\u5b78\u7fd2",
-      "\u6211\u4e00\u5b9a\u505a\u4e0d\u5230",
-      "\u53ea\u505a\u5df2\u7d93\u6703\u7684\u4e8b",
-      "\u9047\u5230\u56f0\u96e3\u5c31\u602a\u5225\u4eba",
+      { zh: "\u5f9e\u6b64\u4e0d\u518d\u6bd4\u8cfd", en: "Never compete again" },
+      { zh: "\u8a8d\u70ba\u81ea\u5df1\u6c92\u5929\u4efd", en: "Decide you have no talent" },
+      { zh: "\u5206\u6790\u904e\u7a0b\uff0c\u4e0b\u6b21\u518d\u4f86", en: "Analyze the process and try again" },
+      { zh: "\u602a\u968a\u53cb\u62d6\u7d2f", en: "Blame your teammates" },
     ],
-    correct: 0,
+    correct: 2,
+  },
+  {
+    text: {
+      zh: "\u5c0f\u7d44\u5408\u4f5c\u6642\uff0c\u6700\u597d\u7684\u614b\u5ea6\u662f\uff1f",
+      en: "When working in a team, the best attitude is:",
+    },
+    answers: [
+      { zh: "\u5168\u90e8\u81ea\u5df1\u505a\u5b8c", en: "Do everything yourself" },
+      { zh: "\u5206\u5de5\u5408\u4f5c\u4e26\u5c0a\u91cd\u6bcf\u500b\u4eba\u610f\u898b", en: "Share the work and respect everyone's input" },
+      { zh: "\u53ea\u6311\u6700\u8f15\u9b06\u7684\u90e8\u5206", en: "Only pick the easiest part" },
+      { zh: "\u7b49\u5225\u4eba\u505a\u5b8c\u8ddf\u8457\u4ea4", en: "Wait for others to finish and submit along" },
+    ],
+    correct: 1,
   },
 ];
 
@@ -277,7 +712,7 @@ function flashScreen(kind = "hit") {
 function showBossWarning(enemy) {
   if (!bossWarning || !enemy) return;
 
-  bossWarningName.textContent = enemy.name;
+  bossWarningName.textContent = localize(enemy.name);
   bossWarning.classList.add("is-visible");
   window.clearTimeout(bossWarningTimer);
   bossWarningTimer = window.setTimeout(() => {
@@ -305,25 +740,21 @@ function setView(view) {
 
   if (view === "game") {
     playAlarm();
-    updatePhase(skillReady ? "STRIKE" : "BATTLE");
-    setStatus(
-      skillReady
-        ? "\u5145\u80fd 100%\uff01\u63e1\u7dca\u5b57\u6bcd\u5361\uff0c\u5c0d\u8457 Webcam \u63ee\u51fa\u5149\u528d\u65ac\u64ca\u3002"
-        : "\u602a\u7378\u9396\u5b9a\uff01\u6b63\u5411\u4fe0\uff0c\u8acb\u5de6\u53f3\u79fb\u52d5\u907f\u958b\u653b\u64ca\u3002",
-    );
-    showToast(skillReady ? "\u5145\u80fd 100%：\u63ee\u528d\u65ac\u64ca" : "\u602a\u7378\u9396\u5b9a", skillReady ? "success" : "");
+    updatePhase(skillReady ? t("phase.strike") : t("phase.battle"));
+    setStatus(skillReady ? t("status.charge100Back") : t("status.monsterLocked"));
+    showToast(skillReady ? t("toast.charge100") : t("toast.monsterLocked"), skillReady ? "success" : "");
   }
 
   if (view === "question") {
-    updatePhase("SCAN");
-    setStatus("\u8acb\u8209\u8d77\u6b63\u78ba\u7684 A/B/C/D \u5b57\u6bcd\u5361\uff0c\u6216\u6309\u756b\u9762\u7b54\u6848\u6383\u63cf\u3002");
-    showToast("\u6383\u63cf\u5b57\u6bcd\u5361\u5145\u80fd", "");
+    updatePhase(t("phase.scan"));
+    setStatus(t("status.scanLetter"));
+    showToast(t("toast.scanCard"), "");
   }
 
   if (view === "victory") {
-    updatePhase("CLEAR");
+    updatePhase(t("phase.clear"));
     playVictory();
-    showToast("\u4efb\u52d9\u5b8c\u6210", "success");
+    showToast(t("toast.missionComplete"), "success");
   }
 }
 
@@ -703,7 +1134,7 @@ function updateGameHUD() {
     enemyHud.hidden = !enemy;
   }
   if (enemyHudName) {
-    enemyHudName.textContent = enemy ? enemy.name : "\u5df2\u5b8c\u6210";
+    enemyHudName.textContent = enemy ? localize(enemy.name) : t("status.allMonsterDone");
   }
   if (enemyPortrait && enemy) {
     enemyPortrait.src = enemy.image;
@@ -737,16 +1168,16 @@ function failMission() {
   updateHeroHUD();
   flashScreen("hit");
   playWrong();
-  showToast("\u4efb\u52d9\u5931\u6557\uff01\u6b63\u5411\u4fe0\u88ab\u64ca\u4e2d 3 \u6b21", "danger");
-  setStatus("\u6b63\u5411\u4fe0\u88ab\u64ca\u4e2d 3 \u6b21\uff0c\u4efb\u52d9\u5931\u6557\u3002\u8acb\u518d\u6311\u6230\u4e00\u6b21\uff01");
+  showToast(t("toast.missionFailed"), "danger");
+  setStatus(t("status.failed"));
   if (victoryKicker) {
-    victoryKicker.textContent = "MISSION FAILED";
+    victoryKicker.textContent = t("victory.failedKicker");
   }
   if (victoryTitle) {
-    victoryTitle.textContent = "\u4efb\u52d9\u5931\u6557";
+    victoryTitle.textContent = t("victory.failedTitle");
   }
   if (victoryText) {
-    victoryText.textContent = "\u6b63\u5411\u4fe0\u88ab\u64ca\u4e2d 3 \u6b21\uff0c\u4efb\u52d9\u5931\u6557\u3002\u4e0b\u6b21\u8a18\u5f97\u5de6\u53f3\u79fb\u52d5\u8eb2\u958b\u653b\u64ca\uff0c\u62fe\u5230\u661f\u661f\u624d\u7b54\u984c\u5145\u80fd\uff01";
+    victoryText.textContent = t("victory.failedBody");
   }
   document.body.classList.add("mission-failed");
   setView("victory");
@@ -757,11 +1188,9 @@ function updateMissionUI() {
   const question = QUESTIONS[currentQuestionIndex % QUESTIONS.length];
 
   updateGameHUD();
-  enemyNameEl.textContent = enemy ? enemy.name : "\u5df2\u5b8c\u6210";
+  enemyNameEl.textContent = enemy ? localize(enemy.name) : t("status.allMonsterDone");
   energyText.textContent = `${energy} / ${ENERGY_REQUIRED}`;
-  questionText.textContent = enemy
-    ? question.text
-    : "\u6240\u6709\u602a\u7378\u5df2\u88ab\u64ca\u6557\uff01\u4f60\u5df2\u5b8c\u6210\u6b63\u5411\u6311\u6230\u3002";
+  questionText.textContent = enemy ? localize(question.text) : t("mission.allClear");
   document.body.classList.toggle("skill-ready", skillReady);
 
   energyBar.querySelectorAll("span").forEach((cell, index) => {
@@ -770,40 +1199,40 @@ function updateMissionUI() {
   updateSaber();
 
   answerGrid.innerHTML = "";
-  updateMarkerStatus("\u8acb\u628a A/B/C/D Marker \u5361\u653e\u5165 Webcam \u4e2d\u592e\u6846\u3002", "");
+  updateMarkerStatus(t("mission.markerInsert"), "");
 
   if (!enemy) {
-    skillHint.textContent = "\u6311\u6230\u5b8c\u6210\uff01";
+    skillHint.textContent = t("mission.complete");
     if (victoryKicker) {
-      victoryKicker.textContent = "VICTORY";
+      victoryKicker.textContent = t("victory.kicker");
     }
     if (victoryTitle) {
-      victoryTitle.textContent = "\u6b63\u5411\u80fd\u91cf\u5168\u90e8\u89e3\u653e";
+      victoryTitle.textContent = t("victory.title");
     }
     if (victoryText) {
-      victoryText.textContent = `\u4f60\u64ca\u3680\u4e86 ${ENEMIES.length} \u96bb\u602a\u7378\uff0c\u7e3d\u5206 ${score}\uff01`;
+      victoryText.textContent = t("victory.bodyScore", { n: ENEMIES.length, score });
     }
     setView("victory");
     return;
   }
 
   if (skillReady) {
-    questionText.textContent = "\u5145\u80fd 100%\uff01\u8acb\u56de\u5230\u5834\u666f\uff0c\u63e1\u7dca\u5b57\u6bcd\u5361\u5411\u602a\u7378\u63ee\u528d\u3002";
-    skillHint.textContent = "\u5149\u528d\u5df2\u5b8c\u6210\u5145\u80fd\uff1a\u5728 Webcam \u524d\u5feb\u901f\u6a6b\u63ee\u53f3\u624b\uff0c\u6216\u96d9\u624b\u8209\u9ad8\u91cb\u653e\u7d42\u7d50\u6280\u80fd\u3002";
+    questionText.textContent = t("mission.full");
+    skillHint.textContent = t("mission.skillReadyHint");
     return;
   }
 
   question.answers.forEach((answer, index) => {
     const button = document.createElement("button");
     button.type = "button";
-    button.textContent = `${String.fromCharCode(65 + index)}. ${answer}`;
+    button.textContent = `${String.fromCharCode(65 + index)}. ${localize(answer)}`;
     button.addEventListener("click", () => answerQuestion(index));
     answerGrid.append(button);
   });
 
   skillHint.textContent = skillReady
-    ? "\u5145\u80fd 100%\uff01\u56de\u5230\u5834\u666f\u63ee\u52d5\u5b57\u6bcd\u5361\uff0c\u91cb\u653e\u5149\u528d\u65ac\u64ca\u3002"
-    : "\u628a A/B/C/D Marker \u5361\u653e\u5230 Webcam \u4e2d\u592e\u6846\uff0c\u7cfb\u7d71\u6383\u5230\u5f8c\u6703\u81ea\u52d5\u7b54\u984c\u5145\u80fd\u3002";
+    ? t("mission.skillReadyMarkerHint")
+    : t("mission.markerScanHint");
 }
 
 function answerQuestion(answerIndex) {
@@ -830,15 +1259,11 @@ function answerQuestion(answerIndex) {
     updateSaber();
     createChargeBurst(energy);
     flashScreen(skillReady ? "super" : "good");
-    showToast(skillReady ? "\u5145\u80fd 100%\uff01" : `\u5145\u80fd ${Math.round((energy / ENERGY_REQUIRED) * 100)}%`, "success");
-    setStatus(
-      skillReady
-        ? "\u5145\u80fd 100%\uff01\u5149\u528d\u5df2\u89e3\u653e\uff0c\u56de\u5230\u5834\u666f\u6e96\u5099\u65ac\u64ca\u3002"
-        : "\u6383\u63cf\u6210\u529f\uff01\u5149\u528d\u5145\u80fd\u4e0a\u5347\u3002",
-    );
+    showToast(skillReady ? t("toast.charge100Plain") : t("toast.chargePct", { pct: Math.round((energy / ENERGY_REQUIRED) * 100) }), "success");
+    setStatus(skillReady ? t("status.skillReadyBack") : t("status.scanSuccess"));
     document.body.classList.add("charge-cinematic");
     setView("game");
-    updatePhase(skillReady ? "100%" : "CHARGE");
+    updatePhase(skillReady ? t("phase.full") : t("phase.charge"));
     window.setTimeout(() => {
       document.body.classList.remove("charge-cinematic");
       updateMissionUI();
@@ -851,8 +1276,8 @@ function answerQuestion(answerIndex) {
     updateGameHUD();
     playWrong();
     flashScreen("hit");
-    showToast("答錯了！請重新收集星星", "danger");
-    setStatus("答錯了！請回到場景中重新收集星星再挑戰。");
+    showToast(t("toast.wrong"), "danger");
+    setStatus(t("status.wrong"));
     
     // 直接關閉問題回到遊戲畫面
     setView("game");
@@ -950,13 +1375,13 @@ async function scanAnswerMarker() {
         markerStableCount = 1;
       }
 
-      updateMarkerStatus(`\u6383\u63cf\u4e2d\uff1a${letter}`, "detecting"); // "掃描中：X"
+      updateMarkerStatus(t("mission.scanning", { letter }), "detecting");
 
       if (markerStableCount >= 2 && performance.now() - lastMarkerAnswerAt > 1400) {
         lastMarkerAnswerAt = performance.now();
         markerStableCount = 0;
         markerCandidate = null;
-        updateMarkerStatus(`\u5df2\u8b80\u53d6 ${letter}`, "success"); // "已讀取 X"
+        updateMarkerStatus(t("mission.recognized", { letter }), "success");
         const answerIndex = MARKER_PATTERNS.findIndex((p) => p.letter === letter);
         answerQuestion(answerIndex);
       }
@@ -964,7 +1389,7 @@ async function scanAnswerMarker() {
       markerCandidate = null;
       markerStableCount = 0;
       // Use a consistent prompt instead of flashing "未辨識到"
-      updateMarkerStatus("\u8acb\u5c07\u5b57\u6bcd A/B/C/D \u5c0d\u6e96\u4e2d\u592e\u6846\u5167", "detecting"); // "請將字母 A/B/C/D 對準中央框內"
+      updateMarkerStatus(t("mission.markerCenter"), "detecting");
     }
   } catch (err) {
     console.error("OCR Error:", err);
@@ -977,10 +1402,10 @@ function selectCharacter(character) {
   selectedCharacter = character;
   previewMascot.src = character.image;
   startButton.disabled = false;
-  startButton.textContent = "\u555f\u52d5 Webcam";
+  startButton.textContent = t("hud.start");
   document.body.classList.add("has-character");
   playSelectSound();
-  setStatus(`${character.name} \u6e96\u5099\u5c31\u7dd2\uff1a\u8acb\u5148\u78ba\u8a8d\u89d2\u8272\uff0c\u518d\u958b\u59cb\u6311\u6230\u3002`);
+  setStatus(t("panel.statusReady", { name: localize(character.name) }));
 
   document.querySelectorAll(".character-card").forEach((card) => {
     card.classList.toggle("is-selected", card.dataset.character === character.id);
@@ -1207,10 +1632,10 @@ function resetGame() {
   poseCenterX = null;
   lastStarSpawnAt = performance.now();
   if (victoryKicker) {
-    victoryKicker.textContent = "VICTORY";
+    victoryKicker.textContent = t("victory.kicker");
   }
   if (victoryTitle) {
-    victoryTitle.textContent = "\u6b63\u5411\u80fd\u91cf\u5168\u90e8\u89e3\u653e";
+    victoryTitle.textContent = t("victory.title");
   }
   scoreEl.textContent = "0";
   enemyMeshes.forEach((enemy, index) => {
@@ -1393,8 +1818,8 @@ function spawnStarPickup() {
   starPickup.position.set(x, WORLD.floorY + 0.58, z);
   starPickup.userData.life = 1;
   playCharge(1);
-  showToast("\u661f\u661f\u51fa\u73fe\uff01\u62fe\u53d6\u5f8c\u7b54\u984c\u5145\u80fd", "success");
-  setStatus("\u5145\u80fd\u661f\u661f\u51fa\u73fe\u5728\u6b63\u5411\u4fe0\u7684\u79fb\u52d5\u8def\u5f91\u4e0a\uff01\u5de6\u53f3\u79fb\u52d5\u53bb\u62fe\u53d6\u661f\u661f\u3002");
+  showToast(t("toast.starAppeared"), "success");
+  setStatus(t("status.starAppeared"));
 }
 
 function openQuestionFromStar() {
@@ -1405,9 +1830,9 @@ function openQuestionFromStar() {
   clearEnemyProjectiles();
   clearStarPickup();
   updateMissionUI();
-  updatePhase("SCAN");
-  setStatus("\u62fe\u5230\u5145\u80fd\u661f\u661f\uff01\u73fe\u5728\u56de\u7b54\u4e00\u984c\u70ba\u5149\u528d\u5145\u80fd\u3002");
-  showToast("\u661f\u661f\u5145\u80fd\uff1a\u7b54\u984c\u958b\u59cb", "success");
+  updatePhase(t("phase.scan"));
+  setStatus(t("status.questionStart"));
+  showToast(t("toast.starCharge"), "success");
   setView("question");
 }
 
@@ -1665,9 +2090,9 @@ function startDodgeChallenge(delay = 700) {
   dodgeState = "waiting";
   lastStarSpawnAt = performance.now();
   setView("game");
-  updatePhase("DODGE");
-  setStatus("\u5148\u9583\u907f\u602a\u7378\u653b\u64ca\uff01\u6bcf 5 \u79d2\u5834\u4e0a\u6703\u51fa\u73fe\u661f\u661f\uff0c\u62fe\u5230\u661f\u661f\u624d\u80fd\u7b54\u984c\u5145\u80fd\u3002");
-  showToast("\u8eb2\u653b\u64ca + \u62fe\u661f\u661f\u624d\u7b54\u984c", "danger");
+  updatePhase(t("phase.dodge"));
+  setStatus(t("status.dodgeFirst"));
+  showToast(t("toast.dodgeStart"), "danger");
 
   dodgeTimeout = window.setTimeout(() => {
     if (attemptId !== dodgeAttemptId || dodgeState !== "waiting") return;
@@ -1736,8 +2161,8 @@ function updateEnemyProjectiles(elapsed, dt = 1/60) {
       updateGameHUD();
       flashScreen("hit");
       playAttackHit();
-      showToast(`\u88ab\u602a\u7378\u653b\u64ca\uff01HP ${heroHp} / ${HERO_MAX_HP}`, "danger");
-      setStatus("\u88ab\u64ca\u4e2d\u4e86\uff01\u88ab\u64ca\u4e2d 3 \u6b21\u6703\u4efb\u52d9\u5931\u6557\u3002\u5de6\u53f3\u79fb\u52d5\u9583\u958b\u653b\u64ca\uff0c\u62fe\u661f\u661f\u624d\u80fd\u7b54\u984c\u3002");
+      showToast(t("toast.hitBy", { hp: heroHp, max: HERO_MAX_HP }), "danger");
+      setStatus(t("status.hitWarn"));
       projectile.group.traverse((child) => {
         if (child.material?.emissive) {
           child.material.emissive.setHex(0xffd166);
@@ -1786,8 +2211,8 @@ function updateEnemyProjectiles(elapsed, dt = 1/60) {
       projectile.warning.material.dispose();
       if (projectile.resolveKind === "dodged") {
         dodgeState = "waiting";
-        showToast("\u9583\u907f\u6210\u529f\uff01\u7559\u610f\u661f\u661f", "success");
-        setStatus("\u9583\u907f\u6210\u529f\uff01\u7e7c\u7e8c\u79fb\u52d5\u8eb2\u653b\u64ca\uff0c\u5834\u4e0a\u51fa\u73fe\u661f\u661f\u5f8c\u62fe\u53d6\u624d\u6703\u7b54\u984c\u3002");
+        showToast(t("toast.dodgeSuccess"), "success");
+        setStatus(t("status.dodgeSuccess"));
       }
       return false;
     }
@@ -1911,28 +2336,28 @@ async function beginBattleSequence() {
   resetRoundTimer();
   prepareBattleEntrance();
   setView("game");
-  updatePhase("WARNING");
-  setStatus("\u5371\u96aa\u53cd\u61c9\uff01\u602a\u7378\u6b63\u5728\u5165\u4fb5\uff0c\u6e96\u5099\u555f\u52d5 Webcam\u3002");
-  showToast("\u5371\u96aa\u97f3\u6a02\u555f\u52d5", "danger");
+  updatePhase(t("phase.warning"));
+  setStatus(t("status.dangerStart"));
+  showToast(t("toast.dangerStart"), "danger");
 
   startCamera({ silent: true });
 
   scheduleBattleIntro(() => {
-    updatePhase("BOSS");
-    setStatus("\u602a\u7378\u767b\u5834\uff01\u8acb\u6e96\u5099\u6b63\u5411\u5149\u528d\u3002");
+    updatePhase(t("phase.boss"));
+    setStatus(t("status.bossLanded"));
     revealCurrentEnemy();
   }, 700);
 
   scheduleBattleIntro(() => {
-    updatePhase("HERO");
-    setStatus(`${selectedCharacter.name} \u767b\u5834\uff01\u5148\u5de6\u53f3\u79fb\u52d5\u907f\u958b\u602a\u7378\u653b\u64ca\u3002`);
+    updatePhase(t("phase.hero"));
+    setStatus(t("status.heroLanded", { name: localize(selectedCharacter.name) }));
     revealHero();
   }, 2200);
 
   scheduleBattleIntro(() => {
-    updatePhase("DODGE");
-    setStatus("\u602a\u7378\u767c\u5c04\u80fd\u91cf\u5f48\uff01\u7528 Webcam \u5de6\u53f3\u79fb\u52d5\u9583\u907f\uff0c\u6c92\u6709\u93e1\u982d\u6642\u53ef\u7528 A/D \u6216\u5de6\u53f3\u9375\u6e2c\u8a66\u3002");
-    showToast("\u9583\u907f\u653b\u64ca\uff1a\u5de6\u53f3\u79fb\u52d5", "danger");
+    updatePhase(t("phase.dodge"));
+    setStatus(t("status.dodgeTrain"));
+    showToast(t("toast.dodgeAttack"), "danger");
   }, 3400);
 
   scheduleBattleIntro(() => {
@@ -1961,8 +2386,8 @@ function triggerSkill() {
   combo += 1;
   scoreEl.textContent = String(score);
   updateGameHUD();
-  showToast("VICTORY! \u5149\u528d\u65ac\u64ca\u6210\u529f", "success");
-  setStatus("VICTORY! \u5149\u528d\u65ac\u64ca\u6210\u529f\uff0c\u602a\u7378\u5316\u70ba\u5149\u9ede\u6d88\u5931\u3002");
+  showToast(t("toast.victoryStrike"), "success");
+  setStatus(t("status.victoryStrike"));
 
   window.setTimeout(() => {
     currentEnemyIndex += 1;
@@ -2250,7 +2675,7 @@ function resizeCanvases() {
 }
 
 async function createLandmarker() {
-  setStatus("\u6b63\u5728\u8f09\u5165\u52d5\u4f5c\u8ffd\u8e64\u6a21\u578b...");
+  setStatus(t("status.warmingTracker"));
   const { DrawingUtils, FilesetResolver, PoseLandmarker, wasmUrl } = await loadVisionTasks();
   const fileset = await FilesetResolver.forVisionTasks(wasmUrl);
 
@@ -2274,7 +2699,7 @@ async function startCamera(options = {}) {
   const silent = options?.silent === true;
 
   if (!selectedCharacter) {
-    setStatus("\u8acb\u5148\u9078\u64c7\u4e00\u4f4d\u6b63\u5411\u4fe0\u3002");
+    setStatus(t("status.pickHero"));
     return false;
   }
 
@@ -2305,7 +2730,7 @@ async function startCamera(options = {}) {
     }
     running = true;
     document.body.classList.add("is-playing");
-    startButton.textContent = "\u904a\u6232\u9032\u884c\u4e2d";
+    startButton.textContent = t("hud.starting");
     resizeCanvases();
 
     if (!landmarker) {
@@ -2315,7 +2740,7 @@ async function startCamera(options = {}) {
         console.warn(trackingError);
         moveState.textContent = "camera only";
         if (!silent) {
-          setStatus("\u5df2\u555f\u52d5 Webcam\uff0c\u52d5\u4f5c\u8ffd\u8e64\u6b63\u5728\u5f8c\u5099\u6a21\u5f0f\u3002");
+          setStatus(t("status.cameraOnly"));
         }
         setTimeout(predictFrame, 25);
         return true;
@@ -2323,13 +2748,13 @@ async function startCamera(options = {}) {
     }
 
     if (!silent) {
-      setStatus(`${selectedCharacter.name} \u5df2\u51fa\u52d5\uff01\u8acb\u6309\u300c\u7b54\u984c\u5145\u80fd\u300d\u70ba\u5149\u528d\u5132\u6eff\u80fd\u91cf\u3002`);
+      setStatus(t("status.cameraReady", { name: localize(selectedCharacter.name) }));
     }
     setTimeout(predictFrame, 25);
     return true;
   } catch (error) {
     console.error(error);
-    setStatus("\u7121\u6cd5\u555f\u52d5 Webcam\uff1a\u8acb\u5141\u8a31\u76f8\u6a5f\u6b0a\u9650\uff0c\u4e26\u7528 localhost \u6216 HTTPS \u958b\u555f\u9801\u9762\u3002");
+    setStatus(t("status.cameraError"));
     startButton.disabled = !selectedCharacter;
     return false;
   }
@@ -2487,7 +2912,7 @@ function animateThree() {
       updateGameHUD();
       flashScreen("hit");
       playWrong();
-      showToast("\u6642\u9593\u8b66\u5831\uff01Combo \u91cd\u7f6e", "danger");
+      showToast(t("toast.timeWarn"), "danger");
     }
   }
 
@@ -2640,6 +3065,54 @@ window.addEventListener("keydown", (event) => {
     answerQuestion(answerIndex);
   }
 });
+function applyLanguage(lang) {
+  const target = lang === "en" ? "en" : "zh";
+  window.LANG = target;
+  try {
+    localStorage.setItem(LANG_STORAGE_KEY, target);
+  } catch (_) {
+    // ignore storage failures (private mode etc.)
+  }
+  document.documentElement.lang = target === "en" ? "en" : "zh-Hant";
+  document.body.dataset.lang = target;
+
+  // Update static elements marked with data-i18n
+  document.querySelectorAll("[data-i18n]").forEach((node) => {
+    const key = node.dataset.i18n;
+    if (key) node.textContent = t(key);
+  });
+
+  // Update lang toggle button label
+  const toggle = document.querySelector("#langToggle");
+  if (toggle) {
+    toggle.textContent = t("lang.toggle");
+    toggle.setAttribute("aria-label", target === "en" ? "Switch to Chinese" : "Switch to English");
+  }
+
+  // Re-render character cards + selector strings
+  if (typeof window.rerenderCharacters === "function") {
+    window.rerenderCharacters();
+  }
+
+  // Re-render dynamic mission UI (question text, answers, enemy names, HUD)
+  if (typeof updateMissionUI === "function") {
+    updateMissionUI();
+  }
+  if (typeof updateGameHUD === "function") {
+    updateGameHUD();
+  }
+}
+
+const langToggleButton = document.querySelector("#langToggle");
+if (langToggleButton) {
+  langToggleButton.addEventListener("click", () => {
+    playSelectSound();
+    applyLanguage(getCurrentLang() === "zh" ? "en" : "zh");
+  });
+}
+
+applyLanguage(getCurrentLang());
+
 initThree();
 initTesseract();
 startAmbientAudio();

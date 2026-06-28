@@ -12,6 +12,42 @@
   --blue: #57c7ff;
 }
 
+.lang-toggle {
+  position: fixed;
+  top: 0.9rem;
+  right: 0.9rem;
+  z-index: 9999;
+  width: 3rem;
+  height: 3rem;
+  padding: 0;
+  border: 1px solid rgba(117, 255, 194, 0.55);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(15, 47, 53, 0.92), rgba(2, 12, 18, 0.95));
+  color: #d8ffee;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.42),
+    inset 0 0 14px rgba(117, 255, 194, 0.18);
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.lang-toggle:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 209, 102, 0.75);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.5),
+    inset 0 0 18px rgba(255, 209, 102, 0.22);
+}
+
+.lang-toggle:active {
+  transform: translateY(0);
+}
+
 /* Arcade booth game layer: final overrides */
 .stage {
   background:
