@@ -105,7 +105,6 @@
       var button = document.createElement("button");
       var image = document.createElement("img");
       var name = document.createElement("span");
-      var virtue = document.createElement("small");
 
       button.type = "button";
       button.className = "character-card";
@@ -114,8 +113,7 @@
       image.src = character.image;
       image.alt = localize(character.name);
       name.textContent = localize(character.name);
-      virtue.textContent = localize(character.virtue);
-      button.append(image, name, virtue);
+      button.append(image, name);
       button.addEventListener("click", function () {
         setSelected(character);
       });
