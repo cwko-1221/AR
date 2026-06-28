@@ -582,11 +582,16 @@ const QUESTIONS = [
 const ENERGY_REQUIRED = 3;
 const HERO_MAX_HP = 3;
 const STAGES = [
-  { id: 1, enemyCount: 1, ballInterval: 1800, maxConcurrentBalls: 1 },
-  { id: 2, enemyCount: 3, ballInterval: 1200, maxConcurrentBalls: 1 },
-  { id: 3, enemyCount: 5, ballInterval: 850, maxConcurrentBalls: 2 },
+  { id: 1, monsterCount: 1, ballInterval: 1700, maxConcurrentBalls: 1 },
+  { id: 2, monsterCount: 3, ballInterval: 1100, maxConcurrentBalls: 2 },
+  { id: 3, monsterCount: 5, ballInterval: 800, maxConcurrentBalls: 3 },
 ];
-const TOTAL_STAGE_FIGHTS = STAGES.reduce((sum, s) => sum + s.enemyCount, 0);
+const STAGE_POSITIONS = {
+  1: [0],
+  3: [-2.0, 0, 2.0],
+  5: [-2.8, -1.4, 0, 1.4, 2.8],
+};
+const TOTAL_STAGE_FIGHTS = STAGES.reduce((sum, s) => sum + s.monsterCount, 0);
 const STAR_SPAWN_INTERVAL = 5000;
 const MARKER_GRID_SIZE = 4;
 const MARKER_SCAN_SIZE = 112;
@@ -663,7 +668,7 @@ let starActive = false;
 let lastStarSpawnAt = 0;
 let currentEnemyIndex = 0;
 let currentStage = 0;
-let enemiesDefeatedInStage = 0;
+let stageEnemies = [];
 let totalEnemiesDefeated = 0;
 let energy = 0;
 let heroHp = HERO_MAX_HP;
@@ -1148,11 +1153,11 @@ function updateGameHUD() {
   const stage = STAGES[Math.min(currentStage, STAGES.length - 1)];
   if (roundText) {
     const stageNum = Math.min(currentStage + 1, STAGES.length);
-    const inStage = Math.min(enemiesDefeatedInStage + 1, stage.enemyCount);
+    const alive = aliveCountInStage();
     roundText.textContent = t("stage.progress", {
       stage: stageNum,
-      p: inStage,
-      total: stage.enemyCount,
+      p: alive,
+      total: stage.monsterCount,
     });
   }
   if (comboText) {
@@ -1649,7 +1654,7 @@ function resetGame() {
   score = 0;
   currentEnemyIndex = 0;
   currentStage = 0;
-  enemiesDefeatedInStage = 0;
+  stageEnemies = [];
   totalEnemiesDefeated = 0;
   currentQuestionIndex = 0;
   energy = 0;
@@ -1669,14 +1674,7 @@ function resetGame() {
     victoryTitle.textContent = t("victory.title");
   }
   scoreEl.textContent = "0";
-  enemyMeshes.forEach((enemy, index) => {
-    enemy.defeated = false;
-    enemy.slot.visible = true;
-    enemy.slot.userData.defeat = 1;
-    enemy.mesh.material.opacity = 1;
-    enemy.halo.material.opacity = index === 0 ? 0.24 : 0.08;
-  });
-  refreshEnemies();
+  initStage(0);
   updateMissionUI();
   resetRoundTimer();
   setView("select");
@@ -2037,8 +2035,12 @@ function clearDodgeTimeout() {
 }
 
 function createEnemyProjectile(attemptId = dodgeAttemptId) {
-  const enemy = enemyMeshes[currentEnemyIndex];
-  if (!scene || !enemy || enemy.defeated || !enemy.slot.visible || attemptId !== dodgeAttemptId) return;
+  if (attemptId !== dodgeAttemptId) return;
+  const aliveEntries = stageEnemies.filter((e) => !e.defeated);
+  if (!scene || !aliveEntries.length) return;
+  const sourceEntry = aliveEntries[Math.floor(Math.random() * aliveEntries.length)];
+  const enemy = enemyMeshes[sourceEntry.meshIndex];
+  if (!enemy || enemy.defeated || !enemy.slot.visible) return;
 
   const enemyPosition = enemy.slot.getWorldPosition(new THREE.Vector3());
   const laneCount = 7;
@@ -2255,13 +2257,20 @@ function updateEnemyProjectiles(elapsed, dt = 1/60) {
 }
 
 function refreshEnemies() {
+  const scale = stageEnemies.length >= 5 ? 0.82 : stageEnemies.length === 3 ? 0.9 : 0.98;
   enemyMeshes.forEach((enemy, index) => {
-    const isCurrent = index === currentEnemyIndex && !enemy.defeated;
-    enemy.slot.visible = isCurrent;
-    enemy.slot.position.x = 0;
-    enemy.slot.position.z = ENEMY_Z;
-    enemy.slot.scale.setScalar(isCurrent ? 0.98 : 0.08);
-    enemy.halo.material.opacity = isCurrent ? 0.26 : 0;
+    const entry = stageEnemies.find((e) => e.meshIndex === index && !e.defeated);
+    if (entry) {
+      enemy.slot.visible = true;
+      enemy.slot.position.x = entry.x;
+      enemy.slot.position.z = ENEMY_Z;
+      enemy.slot.scale.setScalar(scale);
+      enemy.halo.material.opacity = 0.26;
+    } else {
+      enemy.slot.visible = false;
+      enemy.slot.scale.setScalar(0.08);
+      enemy.halo.material.opacity = 0;
+    }
   });
 }
 
@@ -2295,15 +2304,25 @@ function prepareBattleEntrance() {
 }
 
 function revealCurrentEnemy() {
-  const enemy = enemyMeshes[currentEnemyIndex];
-  if (!enemy) return;
+  if (!stageEnemies.length) return;
 
-  enemy.slot.visible = true;
-  enemy.slot.position.set(0, WORLD.floorY + 1.28, ENEMY_Z);
-  enemy.slot.scale.setScalar(1.18);
-  enemy.halo.material.opacity = 0.5;
+  const introScale = stageEnemies.length >= 5 ? 1.0 : stageEnemies.length === 3 ? 1.08 : 1.18;
+  stageEnemies.forEach((entry) => {
+    const mesh = enemyMeshes[entry.meshIndex];
+    if (!mesh) return;
+    mesh.slot.visible = true;
+    mesh.slot.position.set(entry.x, WORLD.floorY + 1.28, ENEMY_Z);
+    mesh.slot.scale.setScalar(introScale);
+    mesh.halo.material.opacity = 0.5;
+    if (mesh.mesh && mesh.mesh.material) {
+      mesh.mesh.material.opacity = 1;
+    }
+  });
   document.body.classList.add("enemy-entered");
-  showBossWarning(ENEMIES[currentEnemyIndex]);
+  const firstAlive = stageEnemies.find((e) => !e.defeated);
+  if (firstAlive) {
+    showBossWarning(ENEMIES[firstAlive.meshIndex]);
+  }
   flashScreen("hit");
   playAlarm();
 
@@ -2367,6 +2386,7 @@ async function beginBattleSequence() {
   startAmbientAudio();
   playDangerStart();
   resetRoundTimer();
+  initStage(currentStage);
   prepareBattleEntrance();
   setView("game");
   updatePhase(t("phase.warning"));
@@ -2400,63 +2420,124 @@ async function beginBattleSequence() {
   }, 4200);
 }
 
-function triggerSkill() {
-  const enemy = enemyMeshes[currentEnemyIndex];
+function syncCurrentEnemyIndex() {
+  const alive = stageEnemies.find((e) => !e.defeated);
+  currentEnemyIndex = alive ? alive.meshIndex : ENEMIES.length;
+}
 
-  if (!skillReady || !enemy || enemy.defeated || performance.now() - lastSkillAt < 1200) return;
+function aliveCountInStage() {
+  return stageEnemies.filter((e) => !e.defeated).length;
+}
+
+function updateStageHpBar() {
+  const stage = STAGES[Math.min(currentStage, STAGES.length - 1)];
+  if (!stage || !stage.monsterCount) {
+    enemyHp = 0;
+    return;
+  }
+  enemyHp = (aliveCountInStage() / stage.monsterCount) * 100;
+}
+
+function initStage(stageIdx) {
+  const stage = STAGES[stageIdx];
+  if (!stage) {
+    stageEnemies = [];
+    syncCurrentEnemyIndex();
+    refreshEnemies();
+    return;
+  }
+
+  const positions = STAGE_POSITIONS[stage.monsterCount] || [0];
+  stageEnemies = [];
+  for (let i = 0; i < stage.monsterCount; i += 1) {
+    stageEnemies.push({
+      meshIndex: i % ENEMIES.length,
+      x: positions[i] ?? 0,
+      defeated: false,
+    });
+  }
+
+  enemyMeshes.forEach((m, i) => {
+    const inStage = stageEnemies.some((e) => e.meshIndex === i);
+    m.defeated = !inStage;
+    m.slot.userData.defeat = inStage ? 1 : 0;
+    if (m.mesh && m.mesh.material) {
+      m.mesh.material.transparent = true;
+      m.mesh.material.opacity = inStage ? 1 : 0;
+    }
+    if (m.halo && m.halo.material) {
+      m.halo.material.opacity = inStage ? 0.26 : 0;
+    }
+  });
+
+  syncCurrentEnemyIndex();
+  updateStageHpBar();
+  refreshEnemies();
+  updateGameHUD();
+}
+
+function triggerSkill() {
+  if (!skillReady || performance.now() - lastSkillAt < 1200) return;
+  const targetEntry = stageEnemies.find((e) => !e.defeated);
+  if (!targetEntry) return;
+  const enemy = enemyMeshes[targetEntry.meshIndex];
+  if (!enemy) return;
 
   lastSkillAt = performance.now();
   playSlashSound();
-  clearEnemyProjectiles();
   clearStarPickup();
   createSkillBeam(enemy.slot);
   createSlashTrail(enemy.slot);
   enemy.defeated = true;
   enemy.slot.userData.defeat = 1;
-  enemyHp = 0;
+  targetEntry.defeated = true;
+  totalEnemiesDefeated += 1;
   energy = 0;
   skillReady = false;
   score += 5 + combo;
   combo += 1;
   scoreEl.textContent = String(score);
+  updateStageHpBar();
+  syncCurrentEnemyIndex();
   updateGameHUD();
   showToast(t("toast.victoryStrike"), "success");
   setStatus(t("status.victoryStrike"));
 
+  const stageJustCleared = aliveCountInStage() === 0;
+  const allStagesDone = stageJustCleared && currentStage >= STAGES.length - 1;
+
   window.setTimeout(() => {
-    totalEnemiesDefeated += 1;
-    enemiesDefeatedInStage += 1;
-    const stage = STAGES[currentStage];
-    const stageJustCleared = enemiesDefeatedInStage >= stage.enemyCount;
-    const allDone = stageJustCleared && currentStage >= STAGES.length - 1;
-
-    if (stageJustCleared && !allDone) {
-      currentStage += 1;
-      enemiesDefeatedInStage = 0;
-    }
-
-    if (allDone) {
-      currentEnemyIndex = ENEMIES.length;
-    } else {
-      currentEnemyIndex = totalEnemiesDefeated % ENEMIES.length;
-    }
-
-    enemyHp = 100;
     resetRoundTimer();
     clearEnemyProjectiles();
     clearDodgeTimeout();
     dodgeState = "idle";
     lastEnemyShotAt = performance.now();
+
+    if (allStagesDone) {
+      stageEnemies = [];
+      currentEnemyIndex = ENEMIES.length;
+      refreshEnemies();
+      updateMissionUI();
+      return;
+    }
+
+    if (stageJustCleared) {
+      currentStage += 1;
+      initStage(currentStage);
+      updateMissionUI();
+      announceStage(currentStage);
+      startDodgeChallenge(1600);
+      return;
+    }
+
+    // Same stage, monsters still alive
     refreshEnemies();
     updateMissionUI();
-    if (!allDone && ENEMIES[currentEnemyIndex]) {
-      if (stageJustCleared) {
-        announceStage(currentStage);
-      } else {
-        showBossWarning(ENEMIES[currentEnemyIndex]);
-      }
-      startDodgeChallenge(stageJustCleared ? 1600 : 900);
+    const nextAlive = stageEnemies.find((e) => !e.defeated);
+    if (nextAlive) {
+      showBossWarning(ENEMIES[nextAlive.meshIndex]);
     }
+    startDodgeChallenge(800);
   }, 650);
 }
 
@@ -2467,8 +2548,16 @@ function announceStage(stageIndex) {
     const label = bossWarning.querySelector("p");
     const subtitle = bossWarning.querySelector("span");
     if (label) label.textContent = t("stage.banner", { n: stage.id });
-    bossWarningName.textContent = localize(ENEMIES[currentEnemyIndex]?.name || { zh: "", en: "" });
-    if (subtitle) subtitle.textContent = t("stage.startStatus", { n: stage.id, total: stage.enemyCount });
+    const firstAlive = stageEnemies.find((e) => !e.defeated);
+    bossWarningName.textContent = firstAlive
+      ? localize(ENEMIES[firstAlive.meshIndex].name)
+      : "";
+    if (subtitle) {
+      subtitle.textContent = t("stage.startStatus", {
+        n: stage.id,
+        total: stage.monsterCount,
+      });
+    }
     bossWarning.classList.add("is-visible", "is-stage");
     window.clearTimeout(bossWarningTimer);
     bossWarningTimer = window.setTimeout(() => {
@@ -2478,7 +2567,7 @@ function announceStage(stageIndex) {
     }, 2000);
   }
   showToast(t("stage.startToast", { n: stage.id }), "success");
-  setStatus(t("stage.startStatus", { n: stage.id, total: stage.enemyCount }));
+  setStatus(t("stage.startStatus", { n: stage.id, total: stage.monsterCount }));
   flashScreen("good");
   playCharge(2);
 }
