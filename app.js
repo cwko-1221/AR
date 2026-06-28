@@ -1872,6 +1872,7 @@ function updateStarPickup(elapsed) {
     dodgeState === "waiting" &&
     !skillReady &&
     !missionFailed &&
+    enemyProjectiles.length === 0 &&
     Boolean(ENEMIES[currentEnemyIndex]);
 
   if (canSpawn && !starActive && performance.now() - lastStarSpawnAt >= STAR_SPAWN_INTERVAL) {
@@ -2034,13 +2035,23 @@ function clearDodgeTimeout() {
   }
 }
 
-function createEnemyProjectile(attemptId = dodgeAttemptId) {
+function fireVolley(attemptId = dodgeAttemptId) {
   if (attemptId !== dodgeAttemptId) return;
   const aliveEntries = stageEnemies.filter((e) => !e.defeated);
-  if (!scene || !aliveEntries.length) return;
-  const sourceEntry = aliveEntries[Math.floor(Math.random() * aliveEntries.length)];
+  aliveEntries.forEach((entry, idx) => {
+    window.setTimeout(() => createEnemyProjectile(entry, attemptId), idx * 60);
+  });
+}
+
+function createEnemyProjectile(sourceEntry, attemptId = dodgeAttemptId) {
+  if (attemptId !== dodgeAttemptId) return;
+  if (!sourceEntry) {
+    const aliveEntries = stageEnemies.filter((e) => !e.defeated);
+    if (!aliveEntries.length) return;
+    sourceEntry = aliveEntries[Math.floor(Math.random() * aliveEntries.length)];
+  }
   const enemy = enemyMeshes[sourceEntry.meshIndex];
-  if (!enemy || enemy.defeated || !enemy.slot.visible) return;
+  if (!scene || !enemy || enemy.defeated || !enemy.slot.visible) return;
 
   const enemyPosition = enemy.slot.getWorldPosition(new THREE.Vector3());
   const laneCount = 7;
@@ -2130,7 +2141,7 @@ function startDodgeChallenge(delay = 700) {
   dodgeTimeout = window.setTimeout(() => {
     if (attemptId !== dodgeAttemptId || dodgeState !== "waiting") return;
     dodgeTimeout = null;
-    createEnemyProjectile(attemptId);
+    fireVolley(attemptId);
   }, delay);
 }
 
@@ -2150,10 +2161,9 @@ function updateEnemyProjectiles(elapsed, dt = 1/60) {
     Boolean(ENEMIES[currentEnemyIndex]);
 
   const stage = STAGES[Math.min(currentStage, STAGES.length - 1)];
-  const liveBalls = enemyProjectiles.filter((p) => !p.resolved).length;
-  if (canAttack && liveBalls < stage.maxConcurrentBalls && performance.now() - lastEnemyShotAt > stage.ballInterval) {
+  if (canAttack && enemyProjectiles.length === 0 && performance.now() - lastEnemyShotAt > stage.ballInterval) {
     lastEnemyShotAt = performance.now();
-    createEnemyProjectile(dodgeAttemptId);
+    fireVolley(dodgeAttemptId);
   }
 
   enemyProjectiles = enemyProjectiles.filter((projectile) => {
@@ -2478,24 +2488,30 @@ function initStage(stageIdx) {
 
 function triggerSkill() {
   if (!skillReady || performance.now() - lastSkillAt < 1200) return;
-  const targetEntry = stageEnemies.find((e) => !e.defeated);
-  if (!targetEntry) return;
-  const enemy = enemyMeshes[targetEntry.meshIndex];
-  if (!enemy) return;
+  const aliveEntries = stageEnemies.filter((e) => !e.defeated);
+  if (!aliveEntries.length) return;
 
   lastSkillAt = performance.now();
   playSlashSound();
   clearStarPickup();
-  createSkillBeam(enemy.slot);
-  createSlashTrail(enemy.slot);
-  enemy.defeated = true;
-  enemy.slot.userData.defeat = 1;
-  targetEntry.defeated = true;
-  totalEnemiesDefeated += 1;
+
+  aliveEntries.forEach((entry, idx) => {
+    const enemy = enemyMeshes[entry.meshIndex];
+    if (!enemy) return;
+    window.setTimeout(() => {
+      createSkillBeam(enemy.slot);
+      createSlashTrail(enemy.slot);
+    }, idx * 90);
+    enemy.defeated = true;
+    enemy.slot.userData.defeat = 1;
+    entry.defeated = true;
+    totalEnemiesDefeated += 1;
+    score += 5 + combo;
+    combo += 1;
+  });
+
   energy = 0;
   skillReady = false;
-  score += 5 + combo;
-  combo += 1;
   scoreEl.textContent = String(score);
   updateStageHpBar();
   syncCurrentEnemyIndex();
@@ -2503,8 +2519,8 @@ function triggerSkill() {
   showToast(t("toast.victoryStrike"), "success");
   setStatus(t("status.victoryStrike"));
 
-  const stageJustCleared = aliveCountInStage() === 0;
-  const allStagesDone = stageJustCleared && currentStage >= STAGES.length - 1;
+  const allStagesDone = currentStage >= STAGES.length - 1;
+  const stageClearDelay = 650 + Math.max(0, (aliveEntries.length - 1) * 90);
 
   window.setTimeout(() => {
     resetRoundTimer();
@@ -2521,24 +2537,12 @@ function triggerSkill() {
       return;
     }
 
-    if (stageJustCleared) {
-      currentStage += 1;
-      initStage(currentStage);
-      updateMissionUI();
-      announceStage(currentStage);
-      startDodgeChallenge(1600);
-      return;
-    }
-
-    // Same stage, monsters still alive
-    refreshEnemies();
+    currentStage += 1;
+    initStage(currentStage);
     updateMissionUI();
-    const nextAlive = stageEnemies.find((e) => !e.defeated);
-    if (nextAlive) {
-      showBossWarning(ENEMIES[nextAlive.meshIndex]);
-    }
-    startDodgeChallenge(800);
-  }, 650);
+    announceStage(currentStage);
+    startDodgeChallenge(1600);
+  }, stageClearDelay);
 }
 
 function announceStage(stageIndex) {
