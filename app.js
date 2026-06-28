@@ -101,7 +101,13 @@ const I18N = {
     "select.body":
       "\u9078\u597d\u89d2\u8272\u5f8c\uff0c\u9032\u5165\u602a\u7378\u9396\u5b9a\u5834\u666f\u3002\u5148\u907f\u958b\u653b\u64ca\uff0c\u62fe\u5230\u661f\u661f\u5f8c\u56de\u7b54\u554f\u984c\u70ba\u5149\u528d\u5145\u80fd\u3002",
     "select.confirm": "\u78ba\u5b9a\u89d2\u8272",
-    "hud.round": "Round",
+    "hud.round": "Stage",
+    "stage.progress": "S{stage} \u00b7 {p}/{total}",
+    "stage.banner": "STAGE {n}",
+    "stage.subtitle": "\u602a\u7269\u5165\u4fb5 - GET READY",
+    "stage.startToast": "Stage {n} \u958b\u59cb\uff01",
+    "stage.startStatus": "Stage {n}\uff1a\u64ca\u6557 {total} \u96bb\u602a\u7378\u9032\u5165\u4e0b\u4e00\u968e\u6bb5\u3002",
+    "stage.allClearStatus": "\u6240\u6709 {n} \u968e\u6bb5\u5b8c\u6210\uff01",
     "hud.score": "Score",
     "hud.move": "Move",
     "hud.combo": "Combo",
@@ -223,7 +229,13 @@ const I18N = {
     "select.body":
       "After choosing, enter the monster lock-on scene. Dodge attacks first, then grab stars and answer questions to charge the saber.",
     "select.confirm": "Confirm",
-    "hud.round": "Round",
+    "hud.round": "Stage",
+    "stage.progress": "S{stage} · {p}/{total}",
+    "stage.banner": "STAGE {n}",
+    "stage.subtitle": "Monster incoming - GET READY",
+    "stage.startToast": "Stage {n} begins!",
+    "stage.startStatus": "Stage {n}: defeat {total} monsters to advance.",
+    "stage.allClearStatus": "All {n} stages cleared!",
     "hud.score": "Score",
     "hud.move": "Move",
     "hud.combo": "Combo",
@@ -569,6 +581,12 @@ const QUESTIONS = [
 
 const ENERGY_REQUIRED = 3;
 const HERO_MAX_HP = 3;
+const STAGES = [
+  { id: 1, enemyCount: 1, ballInterval: 1800, maxConcurrentBalls: 1 },
+  { id: 2, enemyCount: 3, ballInterval: 1200, maxConcurrentBalls: 1 },
+  { id: 3, enemyCount: 5, ballInterval: 850, maxConcurrentBalls: 2 },
+];
+const TOTAL_STAGE_FIGHTS = STAGES.reduce((sum, s) => sum + s.enemyCount, 0);
 const STAR_SPAWN_INTERVAL = 5000;
 const MARKER_GRID_SIZE = 4;
 const MARKER_SCAN_SIZE = 112;
@@ -644,6 +662,9 @@ let starPickup;
 let starActive = false;
 let lastStarSpawnAt = 0;
 let currentEnemyIndex = 0;
+let currentStage = 0;
+let enemiesDefeatedInStage = 0;
+let totalEnemiesDefeated = 0;
 let energy = 0;
 let heroHp = HERO_MAX_HP;
 let currentQuestionIndex = 0;
@@ -1124,8 +1145,15 @@ function updateMascotTexture(character) {
 
 function updateGameHUD() {
   const enemy = ENEMIES[currentEnemyIndex];
+  const stage = STAGES[Math.min(currentStage, STAGES.length - 1)];
   if (roundText) {
-    roundText.textContent = `${Math.min(currentEnemyIndex + 1, ENEMIES.length)} / ${ENEMIES.length}`;
+    const stageNum = Math.min(currentStage + 1, STAGES.length);
+    const inStage = Math.min(enemiesDefeatedInStage + 1, stage.enemyCount);
+    roundText.textContent = t("stage.progress", {
+      stage: stageNum,
+      p: inStage,
+      total: stage.enemyCount,
+    });
   }
   if (comboText) {
     comboText.textContent = `x${combo}`;
@@ -1210,7 +1238,7 @@ function updateMissionUI() {
       victoryTitle.textContent = t("victory.title");
     }
     if (victoryText) {
-      victoryText.textContent = t("victory.bodyScore", { n: ENEMIES.length, score });
+      victoryText.textContent = t("victory.bodyScore", { n: TOTAL_STAGE_FIGHTS, score });
     }
     setView("victory");
     return;
@@ -1620,6 +1648,9 @@ function resetGame() {
   document.body.classList.remove("battle-intro", "danger-phase", "enemy-entered", "hero-entered", "charge-cinematic", "mission-failed");
   score = 0;
   currentEnemyIndex = 0;
+  currentStage = 0;
+  enemiesDefeatedInStage = 0;
+  totalEnemiesDefeated = 0;
   currentQuestionIndex = 0;
   energy = 0;
   heroHp = HERO_MAX_HP;
@@ -2116,7 +2147,9 @@ function updateEnemyProjectiles(elapsed, dt = 1/60) {
     !document.body.classList.contains("view-select") &&
     Boolean(ENEMIES[currentEnemyIndex]);
 
-  if (canAttack && !enemyProjectiles.length && performance.now() - lastEnemyShotAt > 1350) {
+  const stage = STAGES[Math.min(currentStage, STAGES.length - 1)];
+  const liveBalls = enemyProjectiles.filter((p) => !p.resolved).length;
+  if (canAttack && liveBalls < stage.maxConcurrentBalls && performance.now() - lastEnemyShotAt > stage.ballInterval) {
     lastEnemyShotAt = performance.now();
     createEnemyProjectile(dodgeAttemptId);
   }
@@ -2362,7 +2395,8 @@ async function beginBattleSequence() {
 
   scheduleBattleIntro(() => {
     document.body.classList.remove("battle-intro");
-    startDodgeChallenge(300);
+    announceStage(currentStage);
+    startDodgeChallenge(800);
   }, 4200);
 }
 
@@ -2390,7 +2424,23 @@ function triggerSkill() {
   setStatus(t("status.victoryStrike"));
 
   window.setTimeout(() => {
-    currentEnemyIndex += 1;
+    totalEnemiesDefeated += 1;
+    enemiesDefeatedInStage += 1;
+    const stage = STAGES[currentStage];
+    const stageJustCleared = enemiesDefeatedInStage >= stage.enemyCount;
+    const allDone = stageJustCleared && currentStage >= STAGES.length - 1;
+
+    if (stageJustCleared && !allDone) {
+      currentStage += 1;
+      enemiesDefeatedInStage = 0;
+    }
+
+    if (allDone) {
+      currentEnemyIndex = ENEMIES.length;
+    } else {
+      currentEnemyIndex = totalEnemiesDefeated % ENEMIES.length;
+    }
+
     enemyHp = 100;
     resetRoundTimer();
     clearEnemyProjectiles();
@@ -2399,11 +2449,38 @@ function triggerSkill() {
     lastEnemyShotAt = performance.now();
     refreshEnemies();
     updateMissionUI();
-    if (ENEMIES[currentEnemyIndex]) {
-      showBossWarning(ENEMIES[currentEnemyIndex]);
-      startDodgeChallenge(900);
+    if (!allDone && ENEMIES[currentEnemyIndex]) {
+      if (stageJustCleared) {
+        announceStage(currentStage);
+      } else {
+        showBossWarning(ENEMIES[currentEnemyIndex]);
+      }
+      startDodgeChallenge(stageJustCleared ? 1600 : 900);
     }
   }, 650);
+}
+
+function announceStage(stageIndex) {
+  const stage = STAGES[stageIndex];
+  if (!stage) return;
+  if (bossWarning) {
+    const label = bossWarning.querySelector("p");
+    const subtitle = bossWarning.querySelector("span");
+    if (label) label.textContent = t("stage.banner", { n: stage.id });
+    bossWarningName.textContent = localize(ENEMIES[currentEnemyIndex]?.name || { zh: "", en: "" });
+    if (subtitle) subtitle.textContent = t("stage.startStatus", { n: stage.id, total: stage.enemyCount });
+    bossWarning.classList.add("is-visible", "is-stage");
+    window.clearTimeout(bossWarningTimer);
+    bossWarningTimer = window.setTimeout(() => {
+      bossWarning.classList.remove("is-visible", "is-stage");
+      if (label) label.textContent = t("bossWarning.label");
+      if (subtitle) subtitle.textContent = t("bossWarning.ready");
+    }, 2000);
+  }
+  showToast(t("stage.startToast", { n: stage.id }), "success");
+  setStatus(t("stage.startStatus", { n: stage.id, total: stage.enemyCount }));
+  flashScreen("good");
+  playCharge(2);
 }
 
 function createFloor() {

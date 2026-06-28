@@ -213,6 +213,19 @@
   transform: translate(-50%, -50%) scale(1);
 }
 
+.boss-warning.is-stage {
+  border-color: rgba(255, 209, 102, 0.85);
+  background:
+    linear-gradient(90deg, rgba(255, 209, 102, 0.24), rgba(2, 8, 10, 0.9), rgba(117, 255, 194, 0.22));
+  box-shadow:
+    0 0 60px rgba(255, 209, 102, 0.32),
+    inset 0 0 30px rgba(255, 209, 102, 0.18);
+}
+
+.boss-warning.is-stage p {
+  color: #ffd166;
+}
+
 .boss-warning p,
 .boss-warning strong,
 .boss-warning span {
@@ -2866,6 +2879,19 @@ button:disabled {
 .boss-warning.is-visible {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1);
+}
+
+.boss-warning.is-stage {
+  border-color: rgba(255, 209, 102, 0.85);
+  background:
+    linear-gradient(90deg, rgba(255, 209, 102, 0.24), rgba(2, 8, 10, 0.9), rgba(117, 255, 194, 0.22));
+  box-shadow:
+    0 0 60px rgba(255, 209, 102, 0.32),
+    inset 0 0 30px rgba(255, 209, 102, 0.18);
+}
+
+.boss-warning.is-stage p {
+  color: #ffd166;
 }
 
 .boss-warning p,
