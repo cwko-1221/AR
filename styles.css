@@ -48,6 +48,37 @@
   transform: translateY(0);
 }
 
+.enemy-portraits {
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.enemy-portraits img {
+  flex: none;
+  aspect-ratio: 1;
+  object-fit: contain;
+  border-radius: 0.45rem;
+  transition: opacity 220ms ease, filter 220ms ease;
+}
+
+.enemy-portraits[data-count="1"] img {
+  width: 78px;
+}
+
+.enemy-portraits[data-count="3"] img {
+  width: 58px;
+}
+
+.enemy-portraits[data-count="5"] img {
+  width: 44px;
+}
+
+.enemy-portraits img.is-defeated {
+  opacity: 0.28;
+  filter: grayscale(1) brightness(0.7);
+}
+
 /* Arcade booth game layer: final overrides */
 .stage {
   background:

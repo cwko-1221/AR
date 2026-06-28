@@ -27,6 +27,7 @@ const roundText = document.querySelector("#roundText");
 const enemyHud = document.querySelector("#enemyHud");
 const enemyHudName = document.querySelector("#enemyHudName");
 const enemyPortrait = document.querySelector("#enemyPortrait");
+const enemyPortraits = document.querySelector("#enemyPortraits");
 const enemyHpBar = document.querySelector("#enemyHpBar");
 const heroHealth = document.querySelector("#heroHealth");
 const heroHpBar = document.querySelector("#heroHpBar");
@@ -1169,13 +1170,32 @@ function updateGameHUD() {
   if (enemyHudName) {
     enemyHudName.textContent = enemy ? localize(enemy.name) : t("status.allMonsterDone");
   }
-  if (enemyPortrait && enemy) {
-    enemyPortrait.src = enemy.image;
-  }
+  renderEnemyPortraits();
   if (enemyHpBar) {
     enemyHpBar.style.width = `${enemy ? enemyHp : 0}%`;
   }
   updateHeroHUD();
+}
+
+function renderEnemyPortraits() {
+  if (!enemyPortraits) return;
+  enemyPortraits.innerHTML = "";
+  const entries = stageEnemies.length
+    ? stageEnemies
+    : ENEMIES[currentEnemyIndex]
+      ? [{ meshIndex: currentEnemyIndex, defeated: false }]
+      : [];
+  enemyPortraits.dataset.count = String(entries.length);
+  entries.forEach((entry, idx) => {
+    const enemy = ENEMIES[entry.meshIndex];
+    if (!enemy) return;
+    const img = document.createElement("img");
+    if (idx === 0) img.id = "enemyPortrait";
+    img.src = enemy.image;
+    img.alt = localize(enemy.name);
+    if (entry.defeated) img.classList.add("is-defeated");
+    enemyPortraits.appendChild(img);
+  });
 }
 
 function updateHeroHUD() {
