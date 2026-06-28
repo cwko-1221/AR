@@ -49,31 +49,31 @@ const CHARACTERS = window.POSITIVE_HEROES;
 const ENEMIES = [
   {
     id: "comfort",
-    name: { zh: "\u5b89\u8212\u602a", en: "Comfort Beast" },
+    name: { zh: "\u5b89\u8212\u602a", en: "Cozie" },
     image: "./assets/comfort-monster.png",
     x: -2.8,
   },
   {
     id: "lonely",
-    name: { zh: "\u5b64\u884c\u7378", en: "Lonely Beast" },
+    name: { zh: "\u5b64\u884c\u7378", en: "Loner" },
     image: "./assets/lonely-beast.png",
     x: -1.4,
   },
   {
     id: "reject",
-    name: { zh: "\u62d2\u7d55\u9f8d", en: "Reject Dragon" },
+    name: { zh: "\u62d2\u7d55\u9f8d", en: "Non-Non" },
     image: "./assets/reject-dragon.png",
     x: 0,
   },
   {
     id: "lost",
-    name: { zh: "\u8ff7\u5931\u72d0", en: "Lost Fox" },
+    name: { zh: "\u8ff7\u5931\u72d0", en: "Whati" },
     image: "./assets/lost-fox.png",
     x: 1.4,
   },
   {
     id: "entitled",
-    name: { zh: "\u7406\u6240\u7576\u733f", en: "Entitled Ape" },
+    name: { zh: "\u7406\u6240\u7576\u733f", en: "Blinky" },
     image: "./assets/entitled-ape.png",
     x: 2.8,
   },
