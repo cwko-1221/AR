@@ -582,9 +582,9 @@ const QUESTIONS = [
 const ENERGY_REQUIRED = 3;
 const HERO_MAX_HP = 3;
 const STAGES = [
-  { id: 1, monsterCount: 1, ballInterval: 1700, maxConcurrentBalls: 1 },
-  { id: 2, monsterCount: 3, ballInterval: 1100, maxConcurrentBalls: 2 },
-  { id: 3, monsterCount: 5, ballInterval: 800, maxConcurrentBalls: 3 },
+  { id: 1, monsterCount: 1, ballInterval: 2400, maxConcurrentBalls: 1 },
+  { id: 2, monsterCount: 3, ballInterval: 3600, maxConcurrentBalls: 3 },
+  { id: 3, monsterCount: 5, ballInterval: 4800, maxConcurrentBalls: 5 },
 ];
 const STAGE_POSITIONS = {
   1: [0],
